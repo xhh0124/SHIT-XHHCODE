@@ -279,7 +279,7 @@ class TraceInfo(object):
             logger.debug("Got duplicate traceinfo")
             return cls.instances[unique_key]
         instance = cls(source_node, sink_node, trace_type)
-        logger.info("Get TRACEINFO: {}".format(instance))
+        ##logger.info("Get TRACEINFO: {}".format(instance))
         cls.instances[unique_key] = instance
         cls.trace_queue.append(instance)
         return instance
@@ -635,7 +635,7 @@ class Func(object):
             entrypoint = func.getEntryPoint()
             instance = cls.get_instance_at(entrypoint)
             instances.append(instance)
-            logger.info("Get FUNC by name {}: {}".format(function_name, instance))
+            ##logger.info("Get FUNC by name {}: {}".format(function_name, instance))
         return instances
 
     def get_pcode_ops(self):
@@ -1279,7 +1279,7 @@ class FuncCall(object):
         except InvalidFuncErr:
             instance = None
         cls.instances[addr] = instance
-        logger.info("Get FUNCCALL: {}".format(instance))
+        ##logger.info("Get FUNCCALL: {}".format(instance))
         return instance
 
     def __str__(self):
@@ -1683,7 +1683,7 @@ class OutputGraph(object):
                     node.individual_paths_segment_cache = []
             need_delete = []
 
-            logger.info("Now start node {}".format(starting_node))
+            ##logger.info("Now start node {}".format(starting_node))
             traced_path = []
             # This list will be a 2D list something like this:
             # [
@@ -1700,14 +1700,13 @@ class OutputGraph(object):
             i = 0
             while len(traced_path) > 0:
                 i = i + 1
-                logger.info(
-                    "iter {} - backward_trace:\n{}".format(
-                        i,
-                        "\n".join(
-                            "Layer {}: [{}]".format(j, ", ".join(str(trace) for trace in trace_list)) for j, trace_list in enumerate(traced_path)
-                        ),
-                    )
-                )
+                ##logger.info(
+                ##        i,
+                #        "\n".join(
+                #            "Layer {}: [{}]".format(j, ", ".join(str(trace) for trace in trace_list)) for j, trace_list in enumerate(traced_path)
+                #        ),
+                #    )
+                # )
 
                 logger.debug("Checking if path list is empty")
                 if len(traced_path[-1]) == 0:
@@ -1718,7 +1717,7 @@ class OutputGraph(object):
                         latest_completed_trace.source_node.completed_individual_path_processing = True
 
                         logger.debug("Removed corresponding path node as well")
-                    logger.info("11111111")
+                    ##logger.info("11111111")
                     continue
                 next_node_in_path = traced_path[-1][-1].source_node
                 logger.debug("Next node to add to path: {}".format(next_node_in_path))
@@ -1727,7 +1726,7 @@ class OutputGraph(object):
                     need_delete.append(next_node_in_path)
                     logger.debug("Found previously completed segment trace")
                     current_segment = list(l[-1] for l in traced_path)
-                    logger.info("22222222")
+                    ##logger.info("22222222")
                     for cached_segment in getattr(next_node_in_path, "individual_paths_segment_cache", []):
                         paths.append(current_segment.extend(cached_segment))
 
@@ -1736,7 +1735,7 @@ class OutputGraph(object):
                     traced_path[-1].pop()
                     logger.debug("Removed latest path node")
                     total_paths_counter += 1
-                    logger.info("33333333")
+                    ##logger.info("33333333")
                     continue
                 if len(next_node_in_path.backward_traces) > 0:  # There is still more up in the path, continue adding...
                     next_node_backward_traces = next_node_in_path.backward_traces[:]
@@ -1754,20 +1753,20 @@ class OutputGraph(object):
                                     )
                                 )
                                 next_node_backward_traces.pop(next_trace_idx)
-                                logger.info("44444444")
+                                ##logger.info("44444444")
                                 break  # pop from next_node_backward_traces and proceed to check the next item in next_node_backward_traces
                     if len(next_node_backward_traces) != 0:  # Check again in case all the backward_traces were removed due to being duplicates
                         traced_path.append(next_node_backward_traces)
                         logger.debug("Added next_node's forward traces: {}".format(next_node_in_path.backward_traces))
-                        logger.info("55555555")
+                        ##logger.info("55555555")
                         continue
-                logger.info("66666666")
+                ##logger.info("66666666")
                 logger.debug("next_node's forward traces are now empty! End of path has been reached. Saving full path.")
 
                 # First cache the individual segments of the path so that we don't need to process it again if it loops around
                 path_to_save = list(l[-1] for l in traced_path)
                 for idx, trace in enumerate(path_to_save):
-                    logger.info("77777777")
+                    ##logger.info("77777777")
                     if idx == len(path_to_save) - 1:
                         continue
                     segment_to_cache = path_to_save[idx + 1 :]
@@ -1776,7 +1775,7 @@ class OutputGraph(object):
                     except AttributeError:
                         trace.individual_paths_segment_cache = [segment_to_cache]
                 # Save path
-                logger.info("88888888")
+                ##logger.info("88888888")
                 paths.append(path_to_save)
 
                 traced_path[-1].pop()
@@ -1806,11 +1805,11 @@ class OutputGraph(object):
         """
 
         individual_paths = cls._get_all_individual_path_traces(SINK_FUNCS)
-        logger.info(individual_paths)
-        for idx, path in enumerate(individual_paths):
-            logger.info("Path {}:".format(idx))
-            for layer, trace_info in enumerate(path):
-                logger.info("  Layer {}: {}".format(layer, str(trace_info)))
+        ##logger.info(individual_paths)
+        ##for idx, path in enumerate(individual_paths):
+        ##    logger.info("Path {}:".format(idx))
+        ##    for layer, trace_info in enumerate(path):
+        ##        logger.info("  Layer {}: {}".format(layer, str(trace_info)))
 
         total_paths = len(individual_paths)
         for path_counter_idx, path in enumerate(individual_paths):

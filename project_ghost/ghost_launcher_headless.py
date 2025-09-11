@@ -4,6 +4,7 @@ import sys
 import readline
 import datetime
 import shutil
+
 readline.set_completer_delims(" \t\n=")
 readline.parse_and_bind("tab: complete")
 
@@ -33,7 +34,7 @@ def print_logo():
 
 def main():
 
-    #print_logo()
+    # print_logo()
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
     ghidra_path = "./ghidra/support/analyzeHeadless"
@@ -69,7 +70,7 @@ def main():
 
         os.environ["OUTPUT_DIRECTORY"] = output_directory
         os.environ["PROGRAM_NAME"] = program
-        cmd = "sh {} {} temporaryProjectA -import {} -preScript {} -postScript {} -deleteProject".format( 
+        cmd = "sh {} {} temporaryProjectA -import {} -preScript {} -postScript {} -deleteProject".format(
             ghidra_path,
             program_to_analyze_directory,
             program_to_analyze_directory + "/" + program,
