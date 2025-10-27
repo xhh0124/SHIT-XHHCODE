@@ -7,7 +7,8 @@
 
 #####################################################################################################################
 # Imports
-
+# ghost.py
+# -*- coding: utf-8 -*-
 from ghidra.util.task import ConsoleTaskMonitor
 from ghidra.app.decompiler import DecompileOptions, DecompInterface
 from ghidra.program.model.pcode import HighParam, PcodeOp
@@ -23,6 +24,7 @@ from datetime import datetime
 import sys
 import uuid
 import json
+import functools
 
 # The external packages are included in the ./lib subdirectory instead of being listed in a
 # requirements.txt because it can be quite troublesome to install packages on Ghidra's Jython.
@@ -68,7 +70,11 @@ OUTPUT_RELATIVE_PATHS = config["output_relative_paths"]  # bool
 try:  # Grab from environment variables (Usually passed via the launcher script)
     OUTPUT_DIR = os.environ["OUTPUT_DIRECTORY"]
 except:  # Default directory
-    OUTPUT_DIR = os.path.join(SCRIPT_PATH, "GhOST Output", "{}-{}".format(getCurrentProgram().getName(), datetime.now().strftime("%y%m%d_%H%M%S")))
+    OUTPUT_DIR = os.path.join(
+        SCRIPT_PATH,
+        "GhOST Output",
+        "{}-{}".format(getCurrentProgram().getName(), datetime.now().strftime("%y%m%d_%H%M%S")),
+    )
 
 try:
     if not os.path.exists(OUTPUT_DIR):
@@ -166,6 +172,38 @@ for gs in global_symbols:
 # Custom Error
 
 
+def log_call(func, clsname=None):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        name = func.__name__
+        if clsname:
+            name = "%s.%s" % (clsname, func.__name__)
+        else:
+            if args and hasattr(args[0], "__class__"):
+                name = "%s.%s" % (args[0].__class__.__name__, func.__name__)
+        logger.info("Call %s", name)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def log_all_methods(cls):
+    skip_methods = {"__str__", "get_name"}
+
+    for name, attr in cls.__dict__.items():
+        if name in skip_methods:
+            continue
+        if hasattr(attr, "__call__") and not isinstance(attr, (staticmethod, classmethod)):
+            setattr(cls, name, log_call(attr, cls.__name__))
+        elif isinstance(attr, classmethod):
+            func = attr.__func__
+            setattr(cls, name, classmethod(log_call(func, cls.__name__)))
+        elif isinstance(attr, staticmethod):
+            func = attr.__func__
+            setattr(cls, name, staticmethod(log_call(func, cls.__name__)))
+    return cls
+
+
 class InvalidFuncErr(Exception):
     pass
 
@@ -201,13 +239,13 @@ class TraceType(object):
     # When the same variable is referenced/used multiple times in the same function. E.g. It could indicate the
     # same variable being passed-by-reference to many function calls
     SameVarInFunc = "SameVarInFunc"
-
+    
     # Linking an arg in a FuncCall to the param in a Func (loop into the usages of the Param/Arg as it may
     # be a pass-by-reference)
     ArgUsagePassedIntoFunc = "ArgUsagePassedIntoFunc"
 
     # After a trace of ArgUsagePassedIntoFunc, link back the last usage of the Param/Arg to the original Arg
-    # it came from (i.e. exiting back to the original arg it came from so it can continue back on its original path)
+    # it came from (i.e. exiting back to the originial arg it came from so it can continue back on its original path)
     ArgUsagePassedIntoFuncExit = "ArgUsagePassedIntoFuncExit"
 
     # When tracing thunk function arguments, we cannot see the internal code of the function, so we just assume
@@ -215,6 +253,7 @@ class TraceType(object):
     ArgToOtherArgs = "ArgToOtherArgs"
 
 
+@log_all_methods
 class TraceInfo(object):
     instances = {}
     trace_queue = []
@@ -279,7 +318,7 @@ class TraceInfo(object):
             logger.debug("Got duplicate traceinfo")
             return cls.instances[unique_key]
         instance = cls(source_node, sink_node, trace_type)
-        ##logger.info("Get TRACEINFO: {}".format(instance))
+        logger.debug("Get TRACEINFO: {}".format(instance))
         cls.instances[unique_key] = instance
         cls.trace_queue.append(instance)
         return instance
@@ -326,6 +365,9 @@ class TraceInfo(object):
             tinfo, tt = t.func_call, "Out"
 
         return "{} [{}:{} | {}] --> [{}:{} | {}]".format(self.trace_type, tt, tinfo, self.sink_node, ss, sinfo, self.source_node)
+    
+    def __repr__(self):
+        return self.__str__()
 
 
 class VarnodeUpgraderMixin:
@@ -467,7 +509,10 @@ class VarnodeUpgraderMixin:
         self.high_var = varnode.getHigh()
         self.sym = symbol
         self.name = symbol.getName()
-        if self.name in (None, "UNNAMED"):  # Fallback to high variable name just in case
+        if self.name in (
+            None,
+            "UNNAMED",
+        ):  # Fallback to high variable name just in case
             self.name = self.high_var.getName()
         if isinstance(symbol, CodeSymbol):
             return  # CodeSymbol (i.e. the symbols obtained from global_symbols_trace_map do not have the getStorage method; they have no buffer size)
@@ -475,6 +520,7 @@ class VarnodeUpgraderMixin:
         return
 
 
+@log_all_methods
 class Func(object):
     instances_at = {}
     instances_containing = {}
@@ -542,7 +588,12 @@ class Func(object):
         self.vn_sym_map = {}
 
     def __str__(self):
-        return "0x{} {}({}) <=> {}".format(self.entry_address, self.name, ", ".join(str(i) for i in self.params), self.return_val)
+        return "0x{} {}({}) <=> {}".format(
+            self.entry_address,
+            self.name,
+            ", ".join(str(i) for i in self.params),
+            self.return_val,
+        )
 
     @classmethod
     def get_instance_at(cls, entry_addr):
@@ -729,8 +780,14 @@ class Func(object):
         self.func_calls = instances
         return
 
+    # TraceType.SameVarInFunc;when same var used multiple times in same func
     def trace_var_usage(self, node):
-        """Trace all the usages of the same node within the function.
+        """
+        SELF:set trace from self to self when comeing across the same variable usage in the same function.
+            only check arg or function call output,
+            if calloutput,divide and new one,cause may change value
+
+        Trace all the usages of the same node within the function.
 
         Example:
             In this pseudocode, there will be two traces to link the variable `x`,
@@ -769,7 +826,7 @@ class Func(object):
 
         # ---------- Finding same vars ---------- #
         same_vars_in_func = []
-        for pcode in self.get_pcode_ops():
+        for pcode in self.get_pcode_ops():  # find all func_calls in this func,check
             if pcode.getOpcode() != PcodeOp.CALL:
                 continue
             fc = FuncCall.get_instance(pcode)
@@ -792,12 +849,10 @@ class Func(object):
         logger.debug("{} matches for trace_var_usage".format(len(same_vars_in_func)))
 
         # ---------- Linking traces of same vars ---------- #
-        traces = [
-            []
-        ]  # 2nd-level list is for splitting the SameVarInFunc traces into different segments (see the comment for the FuncCallOutput check)
+        traces = [[]]  # 2nd-level list is for splitting the SameVarInFunc traces into different segments (see the comment for the FuncCallOutput check)
         for i in range(len(same_vars_in_func)):
             same_vars_in_func[i].is_traced_same_var = True
-            if i == 0:
+            if i == 0:  # promise at lease one because itself
                 continue
 
             # Don't link a FuncCallOutput as the sink. The value of the FuncCallOutput depends
@@ -814,7 +869,10 @@ class Func(object):
                 if traces[-1] != []:
                     traces.append([])
                 continue
-            traces[-1].append(TraceInfo.get_instance(same_vars_in_func[i - 1], same_vars_in_func[i], TraceType.SameVarInFunc))
+            if isinstance(same_vars_in_func[i-1],Arg) and isinstance(same_vars_in_func[i], Arg):# TODO,Maybe need fix
+                traces[-1].append(
+                    TraceInfo.get_instance(same_vars_in_func[i - 1],same_vars_in_func[i],TraceType.SameVarInFunc)
+                )
         if traces[-1] == []:  # if nothing was added, remove the empty segment
             traces.pop()
         return traces
@@ -904,14 +962,11 @@ class Func(object):
             count += 1
             assembly_instruction = getInstructionBefore(assembly_instruction)
         undefined_caller_address = assembly_instruction.getAddress()
-        logger.debug(
-            "Defined undefined function containing 0x{} - Matched signature {} at {}".format(
-                address, assembly_instruction.toString(), undefined_caller_address
-            )
-        )
+        logger.debug("Defined undefined function containing 0x{} - Matched signature {} at {}".format(address, assembly_instruction.toString(), undefined_caller_address))
         return createFunction(undefined_caller_address, None)
 
 
+@log_all_methods
 class Param(VarnodeUpgraderMixin, object):
     """Represents a parameter of a function (Func).
 
@@ -967,6 +1022,7 @@ class Param(VarnodeUpgraderMixin, object):
         """
         return self.func
 
+    # same with sink's trace_to_arg,all CALL with this params;ROUTINE
     def trace_to_arg(self):
         """Trace from this parameter to the arguments from all the places where the function is called."""
         self.func.find_func_calls()
@@ -976,15 +1032,15 @@ class Param(VarnodeUpgraderMixin, object):
 
     def trace_source_all(self):
         """Main tracing method to start all the other appropriate tracing methods."""
-
+        logger.debug("Param.trace_source_all for {} of {}".format(self, self.func))
         # Only process specific types of tracing based on past traces:
         if not self.is_traced:
+            # param often need forward propagate
             for trace in self.forward_traces:
-                # ArgIsParam means that it was traced from within this Func, so we now need to trace
-                # the flow of Args passed in from outside the Func.
+                # later args need this param,so the param comes from?
                 if trace.trace_type != TraceType.ArgIsParam:
                     continue
-                self.trace_to_arg()
+                self.trace_to_arg()  # same with sink's trace_to_arg
                 self.is_traced = True
                 break
 
@@ -1012,10 +1068,16 @@ class Param(VarnodeUpgraderMixin, object):
                     break
                 for segment in linked_traces:
                     last_linked_node = segment[-1].sink_node
-                    TraceInfo.get_instance(last_linked_node, trace.source_node, TraceType.ArgUsagePassedIntoFuncExit)
+                    TraceInfo.get_instance(
+                        last_linked_node,
+                        trace.source_node,
+                        TraceType.ArgUsagePassedIntoFuncExit,
+                    )
             self.is_traced_same_var = True
+            # TraceType.ArgUsagePassedIntoFuncExit TODO if needed
 
 
+@log_all_methods
 class ArbitraryParam(Param):
     """Params that match to an arbitrary number of arguments. Inherits from Param.
 
@@ -1044,11 +1106,13 @@ class ArbitraryParam(Param):
 
     def trace_source_all(self):
         """Starts all the appropriate tracing methods."""
+        logger.info("ArbitraryParam.trace_source_all for {}".format(self.func))
         if not self.is_traced:
             self.func.find_func_calls()
             self.is_traced = True
 
 
+@log_all_methods
 class ReturnVal(VarnodeUpgraderMixin, object):
     """Represents the return value of a function (Func).
 
@@ -1088,7 +1152,7 @@ class ReturnVal(VarnodeUpgraderMixin, object):
 
     def trace_source_all(self):
         """Main tracing method to start all the other appropriate tracing methods."""
-
+        logger.debug("ReturnVal.trace_source_all for {}".format(self.func))
         if not self.is_traced:
             self.trace_func_call_output()
             self.is_traced = True
@@ -1102,7 +1166,8 @@ class ReturnVal(VarnodeUpgraderMixin, object):
                     TraceInfo.get_instance(last_linked_node, self, TraceType.ArgUsagePassedIntoFuncExit)
 
             self.is_traced_same_var = True
-
+            
+    # TraceType.VarIsFuncCallOutput, when following example
     def trace_func_call_output(self):
         """If this return value comes from a funccalloutput
 
@@ -1203,6 +1268,7 @@ class ReturnVal(VarnodeUpgraderMixin, object):
         return self.func
 
 
+@log_all_methods
 class FuncCall(object):
     instances = {}
     """Represents a function call (i.e. where a function is invoked).
@@ -1279,13 +1345,22 @@ class FuncCall(object):
         except InvalidFuncErr:
             instance = None
         cls.instances[addr] = instance
-        ##logger.info("Get FUNCCALL: {}".format(instance))
+        ##logger.info("Get FUNCCALL{}".format(instance))
         return instance
 
     def __str__(self):
-        return "0x{} {}({}) <=> {}".format(self.addr, self.callee_func.name, ", ".join(str(i) for i in self.args), self.output)
+        return "0x{} {}({}) <=> {}".format(
+            self.addr,
+            self.callee_func.name,
+            ", ".join(str(i) for i in self.args),
+            self.output,
+        )
 
 
+# when meet An arg instance,we need to
+# 1.check this value from param (argisparam) or functioncalloutput(varisfunccalloutput) or local(nosense)
+# 2.forward to see this arg->param (no thunk) or see this arg -> other args (thunk)
+@log_all_methods
 class Arg(VarnodeUpgraderMixin, object):
     """Represents an argument of a function call (FuncCall)
 
@@ -1347,14 +1422,19 @@ class Arg(VarnodeUpgraderMixin, object):
         """
         return self.func_call
 
+    # wrapper function to allocate trace_* func
     def trace_source_all(self):
         """Main tracing method to start all the other appropriate tracing methods."""
-
+        logger.debug("Arg trace_source_all for {} of {}".format(self, self.get_parent()))  # parent - funccall
         if not self.is_traced:
+            # solve this arg from where?
             if isinstance(self.high_var, HighParam):
                 self.trace_source_param()
             else:
                 self.trace_to_func_call_output()
+            # else:local,not donsidered
+
+            # not have forward and thunk -> set ArgToOtherArgs
             if (
                 # Only applies for thunk functions because they do not have code inside for us to trace
                 (self.func_call.callee_func.func.isThunk())
@@ -1363,6 +1443,7 @@ class Arg(VarnodeUpgraderMixin, object):
             ):
                 self.trace_to_other_args()
             else:
+                # else:readable function,
                 if not (len(self.forward_traces) == 1 and self.forward_traces[0].trace_type == TraceType.ParamToArg):
                     # The arg_usage_inside_func (i.e. how the arg is modified as it passes through the callee function)
                     # only needs to be known if the Arg was traced from further down past the FuncCall. If this ParamArg
@@ -1370,24 +1451,16 @@ class Arg(VarnodeUpgraderMixin, object):
                     # itself, so there is no need to trace what happens below the FuncCall. Remember that this program
                     # is for sink-to-source tracing, so we only need to trace upwards.
                     self.trace_arg_usage_inside_func()
+                    # IMP:PARAMTOARG IFF SINK
             self.is_traced = True
         if not self.is_traced_same_var and self.func_call.caller_func:
             self.func_call.caller_func.trace_var_usage(self)
             self.is_traced_same_var = True
 
+    # TraceType.ArgToOtherArgs,when callee_func.func.isThunk();src(s) -> dst if self is dst;as sink(?)
     def trace_to_other_args(self):
-        """Link this arg to the other arguments of the FuncCall
-
-        When the the FuncCall's callee is a thunk function, we cannot check the usages of the param inside the function,
-        but the other args may still affect the value of this arg.
-
-        Example:
-            In strcpy(src, dst), the src arg should trace to the dst arg.
-        """
-
-        # Functions with source_sink_parameter_signatures: Don't link the wrong way.
-        # E.g. For strcpy(dest, src), the trace should have the arg #0 (dest) as the sink_node and the arg #1 (src) as the source_node.
-        # See the source_sink_parameter_signatures option in the config file for the full explanation.
+        # taint-about,set the source->sink traceinfo
+        # if not thunk,we can analyse it instead of search signatures
         callee_name = self.func_call.callee_func.name
         if callee_name in SOURCE_SINK_PARAMETER_SIGNATURES:
             dest_param_indexes = SOURCE_SINK_PARAMETER_SIGNATURES[callee_name]["destination_parameter_indexes"]
@@ -1407,6 +1480,7 @@ class Arg(VarnodeUpgraderMixin, object):
 
             TraceInfo.get_instance(arg, self, TraceType.ArgToOtherArgs)
 
+    # TraceType.ArgUsagePassedIntoFunc;same as arg -> param;as source
     def trace_arg_usage_inside_func(self):
         """Link the arg to the corresponding parameters and its usage inside the FuncCall's callee function.
 
@@ -1419,14 +1493,10 @@ class Arg(VarnodeUpgraderMixin, object):
             param = self.func_call.callee_func.get_arbitrary_param()
         TraceInfo.get_instance(self, param, TraceType.ArgUsagePassedIntoFunc)
 
+    # TraceType.VarIsFuncCallOutput,when not HighParam (else?);find mae CALL's output -> now CALL's arg;as sink
     def trace_to_func_call_output(self):
-        # Trying out repeated tracing loop:
-        # Note that it may trace to multiple FuncCallOutputs because of the MULTIEQUAL P-Code (See https://spinsel.dev/assets/2020-06-17-ghidra-brainfuck-processor-1/ghidra_docs/language_spec/html/additionalpcode.html)
-        logger.debug(
-            "Entering loop for getDef to find all corresponding FuncCallOutputs of varnode @ 0x{} in {} of {}".format(
-                self.origin_varnode.getPCAddress(), self, self.get_parent()
-            )
-        )
+        # Trace by linking varnode to FuncCallOutput,that whether varnode from a FuncCallOutput?
+        logger.debug("Entering loop for getDef to find all corresponding FuncCallOutputs of varnode @ 0x{} in {} of {}".format(self.origin_varnode.getPCAddress(), self, self.get_parent()))
         varnode_processing_queue = [self.origin_varnode]
         # NOTE: For the deduplication_list, this is to prevent unnecessary computations because seemingly the same
         #       varnode could be encountered multiple times. I am not entirely sure why Ghidra does it like this but for
@@ -1442,11 +1512,7 @@ class Arg(VarnodeUpgraderMixin, object):
             if process_counter % 100 == 0:
                 logger.debug("Looped {} times for varnode getDef trace for FuncCallOutput".format(process_counter))
             if process_counter >= MAX_FUNCCALL_OUTPUT_TRACE_DEPTH:
-                logger.warning(
-                    "Hit max iteration limit of {} in trying to trace varnode at 0x{}. Exiting to continue tracing other items.".format(
-                        process_counter, self.origin_varnode.getPCAddress()
-                    )
-                )
+                logger.warning("Hit max iteration limit of {} in trying to trace varnode at 0x{}. Exiting to continue tracing other items.".format(process_counter, self.origin_varnode.getPCAddress()))
                 return
             if vn_def is None:
                 continue
@@ -1469,14 +1535,11 @@ class Arg(VarnodeUpgraderMixin, object):
             logger.debug("Found trace to function call output of {}. Adding trace.".format(fc))
             TraceInfo.get_instance(fc.output, self, TraceType.VarIsFuncCallOutput)
 
+    # TraceType.ArgIsParam,if isinstance(self.high_var, HighParam);find caller's param -> CALL's arg;as sink
     def trace_source_param(self):
         """Trace by linking varnode to caller function's parameter"""
         if not self.func_call.caller_func:
-            logger.debug(
-                "Traced a variable at 0x{} to a function parameter, but was unable to get its corresponding function. The function is likely an UndefinedFunction. Skipping trace.".format(
-                    self.func_call.addr
-                )
-            )
+            logger.debug("Traced a variable at 0x{} to a function parameter, but was unable to get its corresponding function. The function is likely an UndefinedFunction. Skipping trace.".format(self.func_call.addr))
             return None  # This HighParam is a parameter of a UndefinedFunction which could not be automatically defined. See define_undefined_function_containing().
 
         # Do not link to Func Param if it is already linked to a previous
@@ -1495,6 +1558,9 @@ class Arg(VarnodeUpgraderMixin, object):
         TraceInfo.get_instance(param, self, TraceType.ArgIsParam)
 
 
+# when meet An FuncCallOutput instance,we need to
+# check from which args if thunk(FuncCallOutputToArgs),or from return_val if not thunk(FuncCallOutputToReturnVal)
+@log_all_methods
 class FuncCallOutput(VarnodeUpgraderMixin, object):
     """Represents a return value of a function call (FuncCall)
 
@@ -1528,6 +1594,7 @@ class FuncCallOutput(VarnodeUpgraderMixin, object):
 
     def trace_source_all(self):
         """Main tracing method to start all the other appropriate tracing methods."""
+        logger.debug("FuncCallOutput trace_source_all for {} of {}".format(self, self.get_parent()))
         if not self.is_traced:
             if self.func_call.callee_func.func.isThunk():
                 self.trace_to_args()
@@ -1540,6 +1607,8 @@ class FuncCallOutput(VarnodeUpgraderMixin, object):
         return_val = self.func_call.callee_func.return_val
         TraceInfo.get_instance(return_val, self, TraceType.FuncCallOutputToReturnVal)
 
+    # TraceType.FuncCallOutputToArgs,if isThunk();arg -> ret if taint ret;as sink
+    # if Thunk but not Signature: trace to all args -> ret
     def trace_to_args(self):
         # For information about SOURCE_SINK_PARAMETER_SIGNATURES, see Arg.trace_to_other_args() or source_sink_parameter_signatures option in the config.yaml
         callee_name = self.func_call.callee_func.name
@@ -1583,6 +1652,7 @@ class FuncCallOutput(VarnodeUpgraderMixin, object):
 # Output Functions
 
 
+@log_all_methods
 class OutputGraph(object):
     """Contains methods to output graph.
 
@@ -1614,27 +1684,35 @@ class OutputGraph(object):
             else:
                 for target_param_index in target_param_indexes:
                     nodes_for_tracing.append(func_call.args[target_param_index])
-
+        # this var saves all the dangerous args of sink funcs,such as src/n in strncpy
         logger.info("Condensing traces...")
         condensed_traces = []
         nodes_index = 0
         while nodes_index < len(nodes_for_tracing):
-            node_to_process = nodes_for_tracing[nodes_index]
-            node_parent = node_to_process.get_parent()
+            node_to_process = nodes_for_tracing[nodes_index]  # one arg
+            node_parent = node_to_process.get_parent()  # funccall
             logger.debug("Tracing node {} of {}".format(node_to_process, node_parent))
-            for trace_to_process in node_to_process.backward_traces:
+            for trace_to_process in node_to_process.backward_traces:  # queue to process all nodes
                 logger.debug("Processing trace: {}".format(trace_to_process))
-                if trace_to_process.source_node in nodes_for_tracing:
+                if trace_to_process.source_node in nodes_for_tracing:  # also into graph but the source node wont be processed again
                     logger.debug("The node was already traced.")
                     logger.debug("Linking to existing node & Skipping to next trace.")
-                    trace = TraceInfo.get_instance(trace_to_process.source_node, node_to_process, trace_to_process.trace_type)
+                    trace = TraceInfo.get_instance(
+                        trace_to_process.source_node,
+                        node_to_process,
+                        trace_to_process.trace_type,
+                    )
                     if trace in condensed_traces:
                         logger.debug("The trace was already found. Skipping to next trace.")
                         continue
                     condensed_traces.append(trace)
                     continue
                 nodes_for_tracing.append(trace_to_process.source_node)
-                trace = TraceInfo.get_instance(trace_to_process.source_node, node_to_process, trace_to_process.trace_type)
+                trace = TraceInfo.get_instance(
+                    trace_to_process.source_node,
+                    node_to_process,
+                    trace_to_process.trace_type,
+                )
                 if trace in condensed_traces:
                     logger.debug("The trace was already found. Skipping to next trace.")
                     continue
@@ -1672,56 +1750,45 @@ class OutputGraph(object):
 
         # Backwards tracing, root-to-leaf type of algorithm to split traces into each individual full path
         logger.info("Processing paths...")
-        paths = []
-        need_delete = []
+        paths = []  # paths will be returned
+        need_delete = []  # condense
         for starting_node in starting_nodes:
             for node in need_delete:
-                # assert getattr(node, "completed_individual_path_processing", False) == True
+                # reset the cache of later need_delete nodes
                 if getattr(node, "completed_individual_path_processing", False):
                     node.completed_individual_path_processing = False
                 if hasattr(node, "individual_paths_segment_cache"):
                     node.individual_paths_segment_cache = []
-            need_delete = []
+            need_delete = []  # for nodes
 
             ##logger.info("Now start node {}".format(starting_node))
-            traced_path = []
-            # This list will be a 2D list something like this:
-            # [
-            #   [TraceInfo, TraceInfo, TraceInfo],
-            #   [TraceInfo, TraceInfo, TraceInfo, TraceInfo] <-- This list is the backward_traces of the previous lists index [-1] TraceInfo
-            #   [TraceInfo, TraceInfo] <-- This list is the backward_traces of the previous lists index [-1] TraceInfo
-            # ]
-            # Whereby it traverses forwards from each TraceInfo, thus when it goes all the way to the end (i.e. when the last list's index [-1] TraceInfo has no more backward_traces),
-            # the last TraceInfo of all the lists combined will form a single path. This repeats until all paths are exhausted.
-            traced_path.append(
-                starting_node.backward_traces[:]
-            )  # NOTE: The [:] is required to create a copy of the list, or else modifications to the list when altering the path/output queue will modify the actual source var Arg/Param/etc object as well.
+            traced_path = [] # traced_path:a stack
+            traced_path.append(starting_node.backward_traces[:])  # NOTE: The [:] is required to create a copy of the list, or else modifications to the list when altering the path/output queue will modify the actual source var Arg/Param/etc object as well.
             total_paths_counter = 0  # For giving status information, debugging and logging only
             i = 0
+            # traced_path:2-dim list,(list of nodes,list of backward_traces in this node)
             while len(traced_path) > 0:
                 i = i + 1
-                ##logger.info(
-                ##        i,
-                #        "\n".join(
-                #            "Layer {}: [{}]".format(j, ", ".join(str(trace) for trace in trace_list)) for j, trace_list in enumerate(traced_path)
-                #        ),
-                #    )
-                # )
+                ##logger.info(i,"\n".join("Layer {}: [{}]".format(j, ", ".join(str(trace) for trace in trace_list)) for j, trace_list in enumerate(traced_path)),))
 
                 logger.debug("Checking if path list is empty")
-                if len(traced_path[-1]) == 0:
+                # when the newest node dont have backward_traces
+                processing_node = traced_path[-1]
+                if len(processing_node) == 0:
                     traced_path.pop()
                     logger.debug("Latest path list was empty; removed.")
                     if len(traced_path) > 0:
-                        latest_completed_trace = traced_path[-1].pop()
+                        new_processing_node = traced_path[-1]
+                        latest_completed_trace = new_processing_node.pop()
                         latest_completed_trace.source_node.completed_individual_path_processing = True
 
                         logger.debug("Removed corresponding path node as well")
                     ##logger.info("11111111")
                     continue
-                next_node_in_path = traced_path[-1][-1].source_node
+                # find the back source node
+                next_node_in_path = processing_node[-1].source_node
                 logger.debug("Next node to add to path: {}".format(next_node_in_path))
-
+                # if this node has been processed (has attr) and this value is true
                 if getattr(next_node_in_path, "completed_individual_path_processing", False):
                     need_delete.append(next_node_in_path)
                     logger.debug("Found previously completed segment trace")
@@ -1737,21 +1804,16 @@ class OutputGraph(object):
                     total_paths_counter += 1
                     ##logger.info("33333333")
                     continue
+
                 if len(next_node_in_path.backward_traces) > 0:  # There is still more up in the path, continue adding...
                     next_node_backward_traces = next_node_in_path.backward_traces[:]
                     logger.debug("Checking duplicates in next_node's forward traces: {}".format(next_node_in_path.backward_traces))
 
                     # Remove if the trace is already in the current path (Do not want the path to infinitely loop around itself)
-                    for next_trace_idx in reversed(
-                        range(len(next_node_backward_traces))
-                    ):  # reversed() so that the item can be removed while preserving the indexes of the rest of the list
+                    for next_trace_idx in reversed(range(len(next_node_backward_traces))):  # reversed() so that the item can be removed while preserving the indexes of the rest of the list
                         for node_in_current_path in (l[-1] for l in traced_path):
                             if next_node_backward_traces[next_trace_idx] == node_in_current_path:
-                                logger.debug(
-                                    "Removing duplicate node from next traces (already under current path): {}".format(
-                                        next_node_backward_traces[next_trace_idx]
-                                    )
-                                )
+                                logger.debug("Removing duplicate node from next traces (already under current path): {}".format(next_node_backward_traces[next_trace_idx]))
                                 next_node_backward_traces.pop(next_trace_idx)
                                 ##logger.info("44444444")
                                 break  # pop from next_node_backward_traces and proceed to check the next item in next_node_backward_traces
@@ -1786,7 +1848,13 @@ class OutputGraph(object):
         return paths
 
     @classmethod
-    def output_individual_paths(cls, func_color="#c9e4d8", val_color="#a7d3a9", source_color="#11069d", sink_color="#9b0748"):
+    def output_individual_paths(
+        cls,
+        func_color="#c9e4d8",
+        val_color="#a7d3a9",
+        source_color="#11069d",
+        sink_color="#9b0748",
+    ):
         """Outputs a graph for every path found (i.e. From each sink FuncCall to each end-of-path node).
 
         Notes:
@@ -1820,11 +1888,11 @@ class OutputGraph(object):
             path_end = path[-1].source_node
             path_end_parent = path_end.get_parent()
             graph_name = "SplitPath-0x{}_{}_{}-to-0x{}_{}_{}-{}".format(
-                path_start_parent.entry_address if isinstance(path_start_parent, Func) else path_start_parent.addr,
-                path_start_parent.name if isinstance(path_start_parent, Func) else path_start_parent.callee_func.name,
+                (path_start_parent.entry_address if isinstance(path_start_parent, Func) else path_start_parent.addr),
+                (path_start_parent.name if isinstance(path_start_parent, Func) else path_start_parent.callee_func.name),
                 cls._format_graph_port_name(path_start),
-                path_end_parent.entry_address if isinstance(path_end_parent, Func) else path_end_parent.addr,
-                path_end_parent.name if isinstance(path_end_parent, Func) else path_end_parent.callee_func.name,
+                (path_end_parent.entry_address if isinstance(path_end_parent, Func) else path_end_parent.addr),
+                (path_end_parent.name if isinstance(path_end_parent, Func) else path_end_parent.callee_func.name),
                 cls._format_graph_port_name(path_end),
                 uuid.uuid4().hex,
             )
@@ -1888,9 +1956,7 @@ class OutputGraph(object):
                     )
 
                     funccall.graph_node = node_funccall
-                    if (
-                        funccall.caller_func
-                    ):  # Note: caller_func is None usually happens when the FuncCall is under a "UndefinedFunction" (see define_undefined_function_containing())
+                    if funccall.caller_func:  # Note: caller_func is None usually happens when the FuncCall is under a "UndefinedFunction" (see define_undefined_function_containing())
                         funccall.caller_func.graph_cluster.add_node(node_funccall)
                         funccall.caller_func.child_graph_nodes.append(node_funccall)
                     else:
@@ -1902,9 +1968,7 @@ class OutputGraph(object):
                 addresses = []
                 graph_node_addr_map = {}
                 for i in func.child_graph_nodes:
-                    addr = int(
-                        i.get_name().split("_")[1][2:], 16
-                    )  # E.g. split "funccall_0x00101236_strcpy" to "00101236" then to int so it can be sorted numerically
+                    addr = int(i.get_name().split("_")[1][2:], 16)  # E.g. split "funccall_0x00101236_strcpy" to "00101236" then to int so it can be sorted numerically
                     addresses.append(addr)
                     graph_node_addr_map[addr] = i
                 addresses.sort()
@@ -1945,21 +2009,30 @@ class OutputGraph(object):
 
                 edge = pydot.Edge(
                     "{}:{}{}".format(
-                        trace_source_parent.graph_node.get_name(), cls._format_graph_port_name(trace.source_node), source_extra_attributes
+                        trace_source_parent.graph_node.get_name(),
+                        cls._format_graph_port_name(trace.source_node),
+                        source_extra_attributes,
                     ),
-                    "{}:{}{}".format(trace_sink_parent.graph_node.get_name(), cls._format_graph_port_name(trace.sink_node), sink_extra_attributes),
+                    "{}:{}{}".format(
+                        trace_sink_parent.graph_node.get_name(),
+                        cls._format_graph_port_name(trace.sink_node),
+                        sink_extra_attributes,
+                    ),
                     color=edge_color,
                 )
                 graph.add_edge(edge)
 
             if found_source_in_path:
-                filepath_template = os.path.join(OUTPUT_DIR_POTENTIALLY_VULNERABLE_PATHS, "{}.{{}}".format(graph_name))
+                filepath_template = os.path.join(
+                    OUTPUT_DIR_POTENTIALLY_VULNERABLE_PATHS,
+                    "{}.{{}}".format(graph_name),
+                )
             else:
                 filepath_template = os.path.join(OUTPUT_DIR_UNKNOWN_PATHS, "{}.{{}}".format(graph_name))
 
             full_filepath = filepath_template.format("dot")
             logger.debug("Saving raw dot graph to file ({})".format(full_filepath))
-            graph.write_raw(full_filepath)
+            # graph.write_raw(full_filepath) #DOT SAVE MAYBE FIX
             logger.debug("Graph saved sucessfully")
 
             if PRE_RENDER_GRAPH_SVG:
@@ -1982,13 +2055,19 @@ class OutputGraph(object):
 
             full_filepath = filepath_template.format("csv")
             logger.debug("Saving csv to file ({})".format(full_filepath))
-            output_funccall_csv(full_filepath, graphed_funccalls)
+            output_funccall_csv(full_filepath, graphed_funccalls,found_source_in_path)
             logger.debug("CSV saved sucessfully")
 
         logger.info("All paths have been output.")
 
     @classmethod
-    def output_global(cls, func_color="#c9e4d8", val_color="#a7d3a9", source_color="#11069d", sink_color="#9b0748"):
+    def output_global(
+        cls,
+        func_color="#c9e4d8",
+        val_color="#a7d3a9",
+        source_color="#11069d",
+        sink_color="#9b0748",
+    ):
         """Outputs a global graph (i.e. All the Func and FuncCall objects will be graphed with their respective traces).
 
         Notes:
@@ -2009,7 +2088,7 @@ class OutputGraph(object):
         graph = pydot.Dot("GhOSTGlobalOutput", graph_type="digraph")
         graph.set_node_defaults(shape="plain")
 
-        filtered_traces = cls._get_filtered_traces(SINK_FUNCS)
+        filtered_traces = cls._get_filtered_traces(SINK_FUNCS)  # a little condnse
 
         # Graph Funcs
         logger.info("Graphing Funcs...")
@@ -2023,6 +2102,7 @@ class OutputGraph(object):
                         continue
                 if node_parent in graphed_funcs:
                     continue
+
                 graphed_funcs.append(node_parent)
                 cluster_func = pydot.Cluster(str(node_parent.entry_address), bgcolor=func_color)
                 graph.add_subgraph(cluster_func)
@@ -2067,9 +2147,7 @@ class OutputGraph(object):
                     href=cls._format_href_to_decompiled_funcs(funccall),
                 )
                 funccall.graph_node = node_funccall
-                if (
-                    funccall.caller_func
-                ):  # Note: caller_func is None usually happens when the FuncCall is under a "UndefinedFunction" (see define_undefined_function_containing())
+                if funccall.caller_func:  # Note: caller_func is None usually happens when the FuncCall is under a "UndefinedFunction" (see define_undefined_function_containing())
                     funccall.caller_func.graph_cluster.add_node(node_funccall)
                     funccall.caller_func.child_graph_nodes.append(node_funccall)
                 else:
@@ -2082,9 +2160,7 @@ class OutputGraph(object):
             addresses = []
             graph_node_addr_map = {}
             for i in func.child_graph_nodes:
-                addr = int(
-                    i.get_name().split("_")[1][2:], 16
-                )  # E.g. split "funccall_0x00101236_strcpy" to "00101236" then to int so it can be sorted numerically
+                addr = int(i.get_name().split("_")[1][2:], 16)  # E.g. split "funccall_0x00101236_strcpy" to "00101236" then to int so it can be sorted numerically
                 addresses.append(addr)
                 graph_node_addr_map[addr] = i
             addresses.sort()
@@ -2116,8 +2192,16 @@ class OutputGraph(object):
             sink_extra_attributes = ""
 
             edge = pydot.Edge(
-                "{}:{}{}".format(trace_source_parent.graph_node.get_name(), cls._format_graph_port_name(trace.source_node), source_extra_attributes),
-                "{}:{}{}".format(trace_sink_parent.graph_node.get_name(), cls._format_graph_port_name(trace.sink_node), sink_extra_attributes),
+                "{}:{}{}".format(
+                    trace_source_parent.graph_node.get_name(),
+                    cls._format_graph_port_name(trace.source_node),
+                    source_extra_attributes,
+                ),
+                "{}:{}{}".format(
+                    trace_sink_parent.graph_node.get_name(),
+                    cls._format_graph_port_name(trace.sink_node),
+                    sink_extra_attributes,
+                ),
                 color=edge_color,
             )
 
@@ -2141,7 +2225,8 @@ class OutputGraph(object):
         if SPLIT_GLOBAL_GRAPH_BY_FUNCS:
             for func in graphed_funcs:
                 split_func_graph = pydot.Dot(
-                    "GhOSTGlobalOutput_SplitFunc{}".format(cls._format_graph_node_label(func, val_color)), graph_type="digraph"
+                    "GhOSTGlobalOutput_SplitFunc{}".format(cls._format_graph_node_label(func, val_color)),
+                    graph_type="digraph",
                 )
                 split_func_graph.set_node_defaults(shape="plain")
                 split_func_graph.add_subgraph(func.graph_cluster)
@@ -2176,9 +2261,9 @@ class OutputGraph(object):
             filename = "Global"
             filepath_template = os.path.join(OUTPUT_DIR_GLOBAL_GRAPHS, "{}.{{}}".format(filename))
 
-            full_filepath = filepath_template.format("dot")
-            logger.info("Saving raw dot graph to file ({})".format(full_filepath))
-            graph.write_raw(full_filepath)
+            # full_filepath = filepath_template.format("dot")
+            # logger.info("Saving raw dot graph to file ({})".format(full_filepath))
+            # graph.write_raw(full_filepath)
 
             if PRE_RENDER_GRAPH_SVG:
                 full_filepath = filepath_template.format("svg")
@@ -2198,7 +2283,7 @@ class OutputGraph(object):
             logger.debug("Graph output successful")
 
         logger.info("Saving csv to file ({})".format(OUTPUT_FILEPATH_CALLER_CALLEE_CSV))
-        output_funccall_csv(OUTPUT_FILEPATH_CALLER_CALLEE_CSV, graphed_funccalls)
+        output_funccall_csv(OUTPUT_FILEPATH_CALLER_CALLEE_CSV, graphed_funccalls,True)
         logger.info("CSV saved sucessfully")
 
     @classmethod
@@ -2296,12 +2381,18 @@ class OutputGraph(object):
             # Format Params
             input_val_tds = ""
             for param in node.params:
-                input_val_tds += val_template.format(val_color=val_color, port_name=cls._format_graph_port_name(param), val_str=str(param))
+                input_val_tds += val_template.format(
+                    val_color=val_color,
+                    port_name=cls._format_graph_port_name(param),
+                    val_str=str(param),
+                )
                 if param.index < len(node.params) - 1:
                     input_val_tds += input_val_seperator
             # Format ReturnVal
             output_val_td = val_template.format(
-                val_color=val_color, port_name=cls._format_graph_port_name(node.return_val), val_str=str(node.return_val)
+                val_color=val_color,
+                port_name=cls._format_graph_port_name(node.return_val),
+                val_str=str(node.return_val),
             )
             # Format Func
             return label_template.format(
@@ -2316,11 +2407,19 @@ class OutputGraph(object):
             # Format Args
             input_val_tds = ""
             for arg in node.args:
-                input_val_tds += val_template.format(val_color=val_color, port_name=cls._format_graph_port_name(arg), val_str=str(arg))
+                input_val_tds += val_template.format(
+                    val_color=val_color,
+                    port_name=cls._format_graph_port_name(arg),
+                    val_str=str(arg),
+                )
                 if arg.index < len(node.args) - 1:
                     input_val_tds += input_val_seperator
             # Format FuncCallOutput
-            output_val_td = val_template.format(val_color=val_color, port_name=cls._format_graph_port_name(node.output), val_str=str(node.output))
+            output_val_td = val_template.format(
+                val_color=val_color,
+                port_name=cls._format_graph_port_name(node.output),
+                val_str=str(node.output),
+            )
             # Format FuncCall
             return label_template.format(
                 table_attributes='cellspacing="0" cellborder="0" border="0"',
@@ -2338,7 +2437,7 @@ FUNC_CALL = []
 SAVE_PATH = []
 
 
-def output_funccall_csv(filepath, funccalls):
+def output_funccall_csv(filepath, funccalls,istaint=False):
     """Outputs a csv file of all the callers and callees in a set of FuncCalls.
 
     Parameters:
@@ -2350,21 +2449,31 @@ def output_funccall_csv(filepath, funccalls):
     with open("{}".format(filepath), "w+") as f:
         SAVE_PATH.append(filepath)
         writer = csv.writer(f)
-        writer.writerow(["Caller Address", "Caller Name", "Caller Parameters", "Callee Address", "Callee Name", "Callee Arguments"])
+        writer.writerow(
+            [
+                "Caller Address",
+                "Caller Name",
+                "Caller Parameters",
+                "Callee Address",
+                "Callee Name",
+                "Callee Arguments",
+            ]
+        )
         fcall = []
         for funccall in funccalls:
             fcall.append(funccall)
             writer.writerow(
                 [
-                    funccall.caller_func.entry_address if funccall.caller_func else "Unknown",
-                    funccall.caller_func.name if funccall.caller_func else "UndefinedFunction",
-                    ", ".join(str(p) for p in funccall.caller_func.params) if funccall.caller_func else "?",
+                    (funccall.caller_func.entry_address if funccall.caller_func else "Unknown"),
+                    (funccall.caller_func.name if funccall.caller_func else "UndefinedFunction"),
+                    (", ".join(str(p) for p in funccall.caller_func.params) if funccall.caller_func else "?"),
                     funccall.addr,
                     funccall.callee_func.name,
                     ", ".join(str(a) for a in funccall.args),
                 ]
             )
-    FUNC_CALL.append(fcall)
+    if istaint: # only record global and istainted
+        FUNC_CALL.append(fcall)
 
 
 def output_decompiled_c_and_disassembly_html(filepath):
@@ -2410,7 +2519,10 @@ def output_decompiled_c_and_disassembly_html(filepath):
         for cu in code_units:
             disassembly_string += disassembly_string_template.format(address=cu.getAddress(), disassembled_instruction=cu.toString())
         html_string += function_string_template.format(
-            entrypoint_address=str(f.getEntryPoint()), name=str(f.getName()), decompiled_c=cgi.escape(decompiled_c), disassembly=disassembly_string
+            entrypoint_address=str(f.getEntryPoint()),
+            name=str(f.getName()),
+            decompiled_c=cgi.escape(decompiled_c),
+            disassembly=disassembly_string,
         )
 
     with open(filepath, "w+") as f:
@@ -2435,6 +2547,8 @@ def main():
     """
     logger.info("Tracing start: {}".format(datetime.now()))
     # Initialize sink's Func & FuncCalls
+    # print(SINK_FUNCS)
+    # return
     for sink_name in SINK_FUNCS:
         logger.info("Begin trace SINK {}".format(sink_name))
         funcs = Func.get_instances_by_name(sink_name)
@@ -2442,7 +2556,10 @@ def main():
             for p in f.params:
                 p.trace_to_arg()
         logger.info("End trace SINK {}".format(sink_name))
-
+    if TraceInfo.trace_queue:
+        logger.info("Current Trace Queue (len={}):".format(len(TraceInfo.trace_queue)))
+        for idx, trace in enumerate(TraceInfo.trace_queue):
+            logger.info("  [{}] {}".format(idx, trace))
     # Start tracing loop via TraceInfo queue
     next_trace = TraceInfo.get_next_in_queue()
     progress_counter = 0
@@ -2451,7 +2568,11 @@ def main():
         if next_trace.trace_type in (TraceType.ArgUsagePassedIntoFunc):
             next_trace.sink_node.trace_source_all()
         else:
-            next_trace.source_node.trace_source_all()
+            next_trace.source_node.trace_source_all()  # backward so,sink is ok,begin source_node's backward queue
+        if TraceInfo.trace_queue:
+            logger.info("Current Trace Queue (len={}):".format(len(TraceInfo.trace_queue)))
+            for idx, trace in enumerate(TraceInfo.trace_queue):
+                logger.info("  [{}] {}".format(idx, trace))
         next_trace = TraceInfo.get_next_in_queue()
         progress_counter += 1
         if progress_counter % 100 == 0:
@@ -2499,20 +2620,22 @@ def extract_c(fcall):
         result = {}
         for idx, chain in enumerate(callchains):
             vuln_name = "vuln{}".format(idx)
-            result[vuln_name] = {
-                ("source" if i == 0 else "sink" if i == len(chain) - 1 else str(i)): (
-                    func if i == 0 or i == len(chain) - 1 else get_c_code_and_disasm(func)
-                )
-                for i, func in enumerate(chain)
-            }
+            result[vuln_name] = {("source" if i == 0 else "sink" if i == len(chain) - 1 else str(i)): (func if i == 0 or i == len(chain) - 1 else get_c_code_and_disasm(func)) for i, func in enumerate(chain)}
 
         with open(output_path, "w") as f:
             json.dump(result, f, indent=4)
 
+    for i, sublist in enumerate(fcall):
+        print("List {}:".format(i))
+        for j, call in enumerate(sublist):
+            print("  [{}][{}] -> {}".format(i, j, call))
+
+    # Funccall may have more than one chain, need to delete
+    # But in real malware,one should have more than one chain
     result = []
     i = 0
     for funccalls in fcall:
-        if i == 0:
+        if i == 0: # filter the global one
             i = 1
             continue
         if not funccalls:
