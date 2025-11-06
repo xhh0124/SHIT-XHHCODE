@@ -2,261 +2,257 @@ import json
 import os
 import yaml
 from openai import OpenAI
-from pprint import pformat
-import json, re
+import re
 
-# ==== 文件路径设置 ====
-VULN_OUTPUT_PATH = "/home/xuehuanhuan/source-sink-ghidra/project_ghost/GhOST Output/bbb-250809_233749/vuln_output.json"
-CONFIG_PATH = "/home/xuehuanhuan/source-sink-ghidra/project_ghost/config.yaml"
-RESULT_PATH = "/home/xuehuanhuan/source-sink-ghidra/project_ghost/GhOST Output/bbb-250809_233749/vuln_analysis_results.json"
+# ==== 根目录设置 ====
+BASE_OUTPUT_DIR = "/home/xuehuanhuan/2.LATTE/sample/heper"
+CONFIG_PATH = "/home/xuehuanhuan/2.LATTE/project_ghost/config.yaml"
 
 # ==== 模板字符串 ====
-END_SYSTEM_TEMPLATE = "You are a static analysis expert. " "Given the final function calling a sink (e.g., strcpy, memcpy) with exact argument sizes, " "determine if there is a vulnerability. " "Take care of the santinazation or bound check." "Begin your answer with 'Yes' or 'No', followed by a brief explanation." "The provided [CALL_CONTEXT] contains the actual parameter information at the time the function is called, and you should only consider this real execution scenario." "When evaluating arguments, focus only on the relevant field for the data type (e.g., use buf_size for pointer/array types, value_range for numeric types) and ignore unrelated fields"
-
-SYSTEM_TEMPLATE = (
-    "You are a static analysis expert performing step-by-step, per-function analysis along a call chain.\n"
-    "Goal: For each given function and its call context (i.e., known argument info), summarize: "
-    "(a) how taint/values propagate inside this function; (b) which calls this function makes, with argument details needed for the next step.\n"
-    "Output: Return ONE single-line JSON object ONLY (no Markdown/prose beyond `note`). "
-    'Use EXACTLY these keys (keep arrays minimal; use "unk" for unknowns):\n'
-    "{"
-    '"fn":"string",'
-    '"sources":[{"source_func":"string","target_var":"string"}],'
-    '"calls":[{"callee":"string","args":[{"arg_index":int,"arg_origin":"param|local","buf_size":"str|unk","value_range":"str|unk","info":"str"}]}],'
-    '"sink":["string"],'
-    '"note":"brief natural hint if truly useful"'
-    "}\n"
-    "RULES:\n"
-    "- Report only facts from THIS snippet or explicit user context; do NOT restate code.\n"
-    '- Always list ALL calls in "calls" (including sinks); also list sinks in "sink".\n'
-    "- Keep parameter features relevant to overflow/judgment (buffer size, array length, integer range).\n"
-    '- Map caller→callee by argument position: use "arg_index"; mark provenance with "arg_origin".\n'
-    "- Record only NEW sources created in this function.\n"
-    '- Use [] or "unk" when none/unknown; no explanations beyond "note".\n'
-    "- No speculation: ignore names; reason from operations and arguments.\n"
-    "CONTEXT / INHERIT:\n"
-    "- If the user message includes a [CALL_CONTEXT] with `arg_hints`, initialize argument details from it before analyzing code.\n"
-    '- If the previous assistant JSON shows a call to THIS function, copy each callee argument’s {buf_size,value_range,info} into the corresponding "args[arg_index]" unless contradicted by current code.\n'
+END_SYSTEM_TEMPLATE = (
+    "You are a static analysis expert performing the final vulnerability evaluation step.\n"
+    "You are given the last function in the call chain that calls a known goal_sink (e.g., strcpy, memcpy, snprintf, etc.).\n"
+    "The provided [CALL_CONTEXT] gives the actual argument conditions at the time of this call — use only this real context for reasoning.\n\n"
+    "Task: Determine whether the call constitutes a CWE-134 vulnerability\n"
+    "Base your reasoning strictly on the provided argument sizes, value ranges, and any bounds or sanitization checks observed in the code.\n"
+    "Do not speculate about other inputs or unseen code.\n\n"
+    "Output format: Begin your answer with **'Yes'** or **'No'**, followed by a short explanation (1–3 sentences) describing the key reason for your decision."
 )
 
+END=(
+"You are a static analysis expert evaluating potential vulnerabilities.\n"
+"Your specific task in this run is to determine whether a given call constitute a **CWE-134: Uncontrolled Format String** vulnerability.\n"
+"Use only the real argument details in [CALL_CONTEXT](gives the actual argument conditions at the time of this call).\n"
+"Each argument entry may include fields such as:\n"
+"  - param_index: its position in the function call,Begin from 1\n"
+'  - usr: "yes" if the argument is tainted or user-controlled, otherwise "no"\n'
+'  - other_info: may describe semantic roles like "format string", "destination buffer", "stdout", etc.\n'
+"  - buf_size, value_range: optional contextual hints\n"
+'"Signature" provides the exact function call signature at this call site.\n'
+"Be concise and deterministic. Do not speculate about unseen code or inputs.\n"
+"{code}"
+)
 
-START_TEMPLATE = "As a program analyst, I give you snippets of C code generated by decompilation, " "using '{source}' as the taint source, '{sink}' as the sink, and the parameter that may be marked as the taint label to extract the taint data flow." "Pay attention to the data alias and tainted data operations. Output in the form of data flows:\n{code}"
+SYSTEM_TEMPLATE = (
+    "You are a static analysis expert performing function-level reasoning along a call chain.\n"
+    "Goal: For each given function and its call context (provided in [CALL_CONTEXT]), summarize:\n "
+    "(a) how taint-like values (from param) propagate from this function to callee or goal_sink;\n "
+    "(b) which calls this function makes, with argument constraint details from (a), for next step analysis\n"
+    "\n"
+    "Output: Return exactly one JSON object on a single line (no Markdown/prose beyond `note`). "
+    'Use EXACTLY these keys (keep arrays minimal; use "unk" for not sure):\n'
+    "{"
+    '"fn":"string",'
+    '"calls":[{"callee":"str","signature":"str","args":[{"arg_index":int,"buf_size":"str|unk","value_range":"str|unk","user":"yes|no","other_info":"str"}]}],'
+    '"goal_sink":["string"],'
+    '"note":"brief natural info if truly useful"'
+    "}\n"
+    "RULES:\n"
+    "- Report only facts from THIS function or explicit user context; do NOT restate code.\n"
+    "- Signature is the *function call point* signature instead of funcion declaration. For example: 'x1=foo(x1,y1)' in main()\{int x1,x2,y1=1,2,3;x2=foo(x1,y1); return 0;\} \n"
+    '- Always list ALL function calls in "calls". If this function itself have a func_call about target sink, analyze potential vulnerability, otherwise copy it to output\n'
+    '- Keep parameter features relevant to overflow or taint propagation (e.g., buf_size for arrays, value_range for integers)."other_info" = any necessary info.\n'
+    '- "user" = whether the variable is usr-controlled.If Arg is format string,it is not usr-controlled'
+    '- Arg_index begins from 1. Use [] or "unk" for missing or unknown fields. Use "note" for concise but necessary supplementary information (e.g., global access, sanitization check).\n'
+    "CONTEXT / INHERIT:\n"
+    "- If the user message includes a [CALL_CONTEXT] with arg_hints, it indicates the callers constraints on this functions arguments; you should only consider the parameters of the current function under these given conditions.\n"
+    "- Your json will be used to build context for the next function in the call chain,be sure to be accurate and complete.\n"
+)
 
-SSMIDDLE_TEMPLATE = "Continue to analyze function according to the above taint analysis results. Pay attention to the data alias marked as the taint label." "and tainted data operations. Important! Refer to the analysis results of the upstream function to infer possible values for the current parameters." 'if you find the sink func,analyse function calls and save into the "calls" iteM:\n{code}'
-MIDDLE_TEMPLATE = "Continue to analyze function according to the above taint analysis results. " "Use upstream call context to initialize current parameter details (arg_hints → args by arg_index). " "Do NOT speculate beyond provided facts.\n" "For EVERY call in this function (including library/sink calls such as strcpy/memcpy/printf), " "record it in the 'calls' array with each argument's taint,array_size,int_range,label;" "a call may have more than one arg(strncpy have three args,etc.)" "Report only facts from THIS snippet or explicit context.\n" "\n{code}"
+START_TEMPLATE = (
+    "As a program analyst, I give you snippets of C code generated by decompilation, "
+    "This is the first function in the call chain — it has no caller context.\n"
+    "A known taint source '{source}' is introduced here, and the goal_sink is '{sink}'.\n"
+    "Analyze the decompiled C code below to trace how data derived from '{source}' propagates within this function, "
+    "including aliases, assignments, and calls that may pass tainted values forward.\n\n"
+    "{code}"
+)
 
+MIDDLE_TEMPLATE = (
+    "Analyze the following function using the provided upstream [CALL_CONTEXT]. "
+    "Initialize parameter details from arg_hints (match by arg_index), and reason only within this function — do not speculate beyond given facts. "
+    "For each call made here (including library or sink calls), record it in the 'calls' array with relevant argument details. "
+    "Base your reasoning solely on this code and the given context.\n\n"
+    "{code}"
+)
 
-END_TEMPLATE = "{code}\n" "Based on the above taint analysis results, analyze whether the code has CWE-120 buffer overflow vulnerability. If there is a" "vulnerability, please explain what kind of vulnerability according to CWE."
-END_TEMPLATE = "{code}\n" "Task: Decide whether this call is a CWE-120 buffer overflow.\n" "Frozen world: The given argument sizes are exact and the only possible values. " "Do NOT speculate or consider any other contexts or inputs.\n" "Decision rule: If source_size > destination_size OR source_size == destination_size → answer 'Yes'. " "If source_size < destination_size → answer 'No'. " "If any required size is unknown → answer 'Yes'.\n" "give your explain"
-END_TEMPLATE = "{code}\n" "Based on the above taint analysis results, determine whether the code contains a CWE-120 buffer overflow vulnerability. " "Respond with 'Yes' or 'No' as the first word of your answer, then provide a brief explanation. "
-# ==== 载入配置 ====
-if not os.path.isfile(CONFIG_PATH):
-    raise FileNotFoundError(f"Missing config: {CONFIG_PATH}")
+END_TEMPLATE = (
+    "Below is the sink in the call chain along with its call context.\n"
+    "Use the argument details provided in [CALL_CONTEXT] and the feature of this sink to decide whether this call  represents a CWE-134 vulnerability.\n\n"
+    "{code}"
+)
 
-with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-    cfg = yaml.safe_load(f)
+S_TEMPLATE = (
+    "You are a static analysis expert performing function-level reasoning.\n"
+    "Goal: For a given function, summarize:\n "
+    "(a) Trace how data derived from '{source}' propagates from this function to any callee.\n"
+    "(b) trace func_calls this function makes, with argument constraint details, for next step analysis\n"
+    "\n"
+    "Output: Return exactly one JSON object on a single line (no Markdown/prose beyond `note`). "
+    'Use EXACTLY these keys (keep arrays minimal; use "unk" for not sure):\n'
+    "{"
+    '"fn":"string",'
+    '"calls":[{"callee":"str","signature":"str","args":[{"arg_index":int,"buf_size":"str|unk","value_range":"str|unk","user":"yes|no","other_info":"str"}]}],'
+    '"goal_sink":["string"],'
+    '"note":"brief natural info if truly useful"'
+    "}\n"
+    "RULES:\n"
+    "- Report only facts from THIS function or explicit user context; do NOT restate code.\n"
+    "- Signature is the *function call point* signature instead of funcion declaration. For example: 'x1=foo(x1,y1)' in main()\{int x1,x2,y1=1,2,3;x2=foo(x1,y1); return 0;\} \n"
+    '- Always list ALL function calls in "calls". If this function itself have a func_call about target sink, analyze potential vulnerability, otherwise copy it to output\n'
+    '- Keep parameter features relevant to overflow or taint propagation (e.g., buf_size for arrays, value_range for integers)."other_info" = any necessary info.\n'
+    '- "user" = whether the variable is usr-controlled.If Arg is format string,it is not usr-controlled'
+    '- Arg_index begins from 1. Use [] or "unk" for missing or unknown fields. Use "note" for concise but necessary supplementary information (e.g., global access, sanitization check).\n'
+    "CONTEXT / INHERIT:\n"
+    "- If the user message includes a [CALL_CONTEXT] with arg_hints, it indicates the callers constraints on this functions arguments; you should only consider the parameters of the current function under these given conditions.\n"
+    "- Your json will be used to build context for the next function in the call chain,be sure to be accurate and complete.\n"
+)
+# ==== 工具函数 ====
+FUNC_NAME_RE = re.compile(r"\b([A-Za-z_]\w*)\s*\(")
 
-api_key = cfg.get("OPENAI_API_KEY")
-if not api_key:
-    raise RuntimeError("OPENAI_API_KEY missing in config.yaml")
+def extract_fn_name(code: str) -> str:
+    m = FUNC_NAME_RE.search(code)
+    return m.group(1) if m else ""
 
-api_base = cfg.get("API_BASE", "https://api.openai.com/v1")
-model = cfg.get("MODEL", "gpt-4o-mini")
-available_models = cfg.get("AVAILABLE_MODELS", [])
-
-if model not in available_models:
-    raise ValueError(f"Selected model '{model}' not in AVAILABLE_MODELS: {available_models}")
-
-# ==== 初始化 OpenAI 客户端 ====
-client = OpenAI(api_key=api_key, base_url=api_base)
-
-
-# ==== 分析函数流 ====
-"""def analyze_flow(flow: dict) -> str:
-    source = flow.get("source")
-    sink = flow.get("sink")
-    func_keys = sorted(int(k) for k in flow if k.isdigit())
-    funcs = [flow[str(i)] for i in func_keys]
-
-    messages = [
-        {"role": "system", "content": "You are a security auditing assistant. Help identify potential vulnerabilities in binary code."},
-        {"role": "user", "content": START_TEMPLATE.format(source=sink, code=funcs[0])},
-    ]
-    for code in funcs[1:]:
-        messages.append({"role": "user", "content": MIDDLE_TEMPLATE.format(code=code)})
-    messages.append({"role": "user", "content": END_TEMPLATE})
-    print(messages)
-    # 发送请求
-    response = client.chat.completions.create(
-        model=model,
-        messages=messages,
-        temperature=0.5,
-    )
-    return response.choices[0].message.content"""
-
+def print_messages(messages):
+    for msg in messages:
+        print(f"\n[{msg['role'].upper()}]")
+        print(msg["content"])
 
 def build_call_context_for(messages, target_fn: str) -> str:
-    """
-    从上一轮 assistant 的 JSON 中，抽取 calls 里指向 target_fn 的 args，
-    生成 [CALL_CONTEXT] 文本块；若没有可用信息，返回空串。
-    """
-
     def parse_assistant_json(text: str):
-        """尽量把上一轮assistant输出解析为JSON（容错：返回None不报错）。"""
         text = text.strip()
-        # 常见情况就是严格的一行JSON
         try:
             return json.loads(text)
         except Exception:
-            pass
-        # 退而求其次：抓第一个以{开头、}结尾的片段
-        try:
-            start = text.find("{")
-            end = text.rfind("}")
-            if start != -1 and end != -1 and end > start:
-                return json.loads(text[start : end + 1])
-        except Exception:
-            return None
+            try:
+                start = text.find("{")
+                end = text.rfind("}")
+                if start != -1 and end != -1:
+                    return json.loads(text[start:end + 1])
+            except Exception:
+                return None
         return None
 
-    # 找最近一条assistant消息
     for msg in reversed(messages):
         if msg.get("role") == "assistant":
             data = parse_assistant_json(msg.get("content", ""))
             if not isinstance(data, dict):
                 continue
-            calls = data.get("calls") or []
-            sink = data.get("sink") or []
+            calls = data.get("calls") or []  # 获取调用列表
+            caller = data.get("fn") or ""  # 获取调用者函数名
+            sink = data.get("goal_sink") or []    # 获取sink列表
+            note= data.get("note") or "None"
             for call in calls:
-                if str(call.get("callee")) == target_fn:
-                    args = call.get("args") or []
-                    # 只保留我们关心的字段，缺失用 "unk"
-                    slim_args = []
-                    for a in args:
-                        slim_args.append(
-                            {
-                                "param_index": a.get("arg_index", 0),
-                                "buf_size": str(a.get("buf_size", "unk")),
-                                "value_range": str(a.get("value_range", "unk")),
-                                "info": str(a.get("info", "unk")),
-                            }
-                        )
-                    ctx = "[CALL_CONTEXT]\n" f"callee={target_fn}\n" "arg_hints: " + json.dumps(slim_args, separators=(",", ":")) + "\n" f"target sink:{sink}\n"
+                if str(call.get("callee")) == target_fn: # 找到目标函数调用,若正是需要的
+                    sign=call.get("signature") or "unk"
+                    args = call.get("args") or [] # 获取参数列表
+                    slim_args = [
+                        {
+                            "param_index": a.get("arg_index", 0),
+                            "buf_size": str(a.get("buf_size", "unk")),
+                            "value_range": str(a.get("value_range", "unk")),
+                            "user": str(a.get("user", "No")),
+                            "other_info": str(a.get("other_info", "None")),
+                        }
+                        for a in args
+                    ]
+                    ctx = "[CALL_CONTEXT]\n" f"caller:{caller} to callee: {target_fn}\n" +f"function call signature:{sign}\n"+f"arg_hints:" + json.dumps(slim_args, separators=(",", ":")) + "\n" + f"Extra note:{note}\n"+f"target sink:{sink}\n"
                     return ctx
-            break  # 最近一条assistant里没有命中就不再更早找
-    return ""  # 没有可用的上游信息
+    return ""
 
-
-FUNC_NAME_RE = re.compile(r"\b([A-Za-z_]\w*)\s*\(")
-
-
-def extract_fn_name(code: str) -> str:
-    """从C反编译片段里提取函数名（取第一个匹配）。"""
-    m = FUNC_NAME_RE.search(code)
-    return m.group(1) if m else ""
-
-
-def print_messages(messages):
-    for msg in messages:
-        role = msg["role"].upper()
-        print(f"\n[{role}]")
-        # 直接打印 content，这样 \n 会换行，\t 会缩进
-        print(msg["content"])
-
-
-def analyze_flow(flow: dict) -> str:
-    source = flow.get("source")
-    sink = flow.get("sink")
-    func_keys = sorted(int(k) for k in flow if k.isdigit())
-    funcs = [flow[str(i)] for i in func_keys]
-
-    # 初始化对话
-    messages = [
-        {"role": "system", "content": SYSTEM_TEMPLATE},
-    ]
-
-    # 首轮：发送 START_TEMPLATE
+# ==== 主分析函数 ====
+def analyze_flow(flow: dict, client, model, api_base):
+    source = flow.get("source") # source名称
+    sink = flow.get("sink") # sink名称
+    func_keys = sorted(int(k) for k in flow if k.isdigit()) # int key
+    funcs = [flow[str(i)] for i in func_keys] # 对应的程序代码,要优化就是这里了
+    messages = [{"role": "system", "content": SYSTEM_TEMPLATE}] # 系统模板
     start_msg = START_TEMPLATE.format(source=source, sink=sink, code=funcs[0])
-    # start_msg = RSTART_TEMPLATE.format(sink=sink, code=funcs[-1])
     messages.append({"role": "user", "content": start_msg})
-    print("=== 首轮对话 ===")
-    # print(messages)
-    response = client.chat.completions.create(
-        model=model,
-        messages=messages,
-        temperature=0.2,
-    )
-    reply = response.choices[0].message.content
-    # print({"role": "assistant", "content": reply})
-    final_reply = reply  # 存一下最后一次回复
-    # 只是记录
+
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0.2) # 投进SYSTEM和START,有第一个函数
     messages.append({"role": "assistant", "content": response.choices[0].message.content})
 
-    # 中间轮：依次发送每个 MIDDLE_TEMPLATE
     for code in funcs[1:]:
-        target_fn = extract_fn_name(code)
+        target_fn = extract_fn_name(code)  # 返回函数名称
         call_ctx = build_call_context_for(messages, target_fn)
-        # for code in reversed(funcs[:-1]):
         middle_msg = MIDDLE_TEMPLATE.format(code=(call_ctx + code))
-        # middle_msg = RMIDDLE_TEMPLATE.format(code=code)
-        messages.append({"role": "user", "content": middle_msg})
-        tmp_messages = [
-            {"role": "system", "content": SYSTEM_TEMPLATE},
-            {"role": "user", "content": middle_msg},
-        ]
-        print("\n=== 中间轮对话 ===")
-        response = client.chat.completions.create(
-            model=model,
-            messages=tmp_messages,
-            temperature=0.2,
-        )
+        tmp_messages = [{"role": "system", "content": SYSTEM_TEMPLATE}, {"role": "user", "content": middle_msg}]
+        messages.append({"role": "user", "content": tmp_messages})
+        response = client.chat.completions.create(model=model, messages=tmp_messages, temperature=0.2)
         messages.append({"role": "assistant", "content": response.choices[0].message.content})
-
-    # 最后一轮：发送 END_TEMPLATE
-    code = funcs[-1]
+        
     call_ctx = build_call_context_for(messages, sink)
-    end_msg = END_TEMPLATE.format(code=call_ctx + "\n" + code)
-    messages.append({"role": "user", "content": end_msg})
-    # messages.append({"role": "user", "content": end_msg})
-
-    tmp_messages = [
-        {"role": "system", "content": END_SYSTEM_TEMPLATE},
-        {"role": "user", "content": end_msg},
-    ]
-    response = client.chat.completions.create(
-        model=model,
-        messages=tmp_messages,
-        temperature=0.2,
-    )
-    final_reply = response.choices[0].message.content
-    messages.append({"role": "assistant", "content": final_reply})
-    print_messages(messages)
-    # ✅ 返回最后的回复（不返回中间的内容）
-    return final_reply
+    end_msg = END_TEMPLATE.format(code=call_ctx)
+    tmp_messages = [{"role": "system", "content": END_SYSTEM_TEMPLATE}, {"role": "user", "content": end_msg}]
+    messages.append({"role": "user", "content": tmp_messages})
+    response = client.chat.completions.create(model=model, messages=tmp_messages, temperature=0.2)
+    messages.append({"role": "assistant", "content": response.choices[0].message.content})
+    return response.choices[0].message.content,messages
 
 
 # ==== 主程序 ====
 def main():
-    if not os.path.isfile(VULN_OUTPUT_PATH):
-        raise FileNotFoundError(f"Missing input file: {VULN_OUTPUT_PATH}")
+    # === 获取LLM参数 ===
+    if not os.path.isfile(CONFIG_PATH):
+        raise FileNotFoundError(f"Missing config: {CONFIG_PATH}")
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+    api_key = cfg.get("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY missing in config.yaml")
+    api_base = cfg.get("API_BASE", "https://api.openai.com/v1")
+    model = cfg.get("MODEL", "gpt-4o-mini")
+    client = OpenAI(api_key=api_key, base_url=api_base)
 
-    with open(VULN_OUTPUT_PATH, "r", encoding="utf-8") as f:
-        data = json.load(f)
+    # === 遍历所有子文件夹 ===
+    for subdir in os.listdir(BASE_OUTPUT_DIR):
+        sub_path = os.path.join(BASE_OUTPUT_DIR, subdir)
+        if not os.path.isdir(sub_path):
+            continue
 
-    results = {}
-    for vid, flow in data.items():
-        print(f"Analyzing {vid} with model {model} (API base: {api_base})...")
-        # try:
-        result = analyze_flow(flow)
-        # except Exception as e:
-        #    result = f"Error during analysis: {e}"
-        results[vid] = result
-        print(f"--- {vid} Result ---\n{result}\n")
+        vuln_output_path = os.path.join(sub_path, "vuln_output.json")
+        result_path = os.path.join(sub_path, "vuln_analysis_results.json")
+        if not os.path.isfile(vuln_output_path):
+            print(f"[跳过] {subdir}: 未找到 vuln_output.json")
+            continue
 
-    with open(RESULT_PATH, "w", encoding="utf-8") as f:
-        json.dump(results, f, ensure_ascii=False, indent=2)
+        print(f"\n=== 分析文件夹: {subdir} ===")
+        with open(vuln_output_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
 
-    print(f"Analysis complete. Output written to {RESULT_PATH}")
+        results = {}
+        for vid, flow in data.items():
+            print(f"Analyzing {vid} in {subdir}...") # vid是vuln0,vuln1...
+            try:
+                result,messages = analyze_flow(flow, client, model, api_base)
+            except Exception as e:
+                result = f"Error during analysis: {e}"
+            results[vid] = result
+            
+            print(f"--- {vid} Result ---\n{result}\n\n\n")
+            for msg in messages:
+                role = msg.get("role", "").upper()
+                content = msg.get("content", "")
+                if isinstance(content, str):
+                    content = content.encode("utf-8").decode("unicode_escape")
+                elif isinstance(content, list):
+                    content = "\n".join(str(x) for x in content)
+                elif isinstance(content, dict):
+                    content = json.dumps(content, ensure_ascii=False, indent=2)
+                else:
+                    content = str(content)
+
+                print(f"\n[{role}]\n{content}\n")
+
+
+        with open(result_path, "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+
+        print(f"✅ {subdir} 分析完成")
+
+    print("🎯 所有文件夹分析完成！")
 
 
 if __name__ == "__main__":
