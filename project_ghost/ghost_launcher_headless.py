@@ -24,12 +24,13 @@ def main1():
         sys.exit(1)
 
     while True:
-        program_to_analyze_directory = "./sample/CWE134_good"
+        program_to_analyze_directory = "./sample/190/190_bads02"
         if program_to_analyze_directory[-1] != "/":
             program_to_analyze_directory += "/"
         if os.path.isdir(program_to_analyze_directory):
             break
         else:
+            print(program_to_analyze_directory)
             print("Invalid path. please enter a valid path.")
             sys.exit(1)
 
@@ -74,7 +75,7 @@ def main2():
         sys.exit(1)
 
     while True:
-        program_to_analyze_directory = "./sample/CWE134_bad"
+        program_to_analyze_directory = "./sample/190/190_goods02"
         if program_to_analyze_directory[-1] != "/":
             program_to_analyze_directory += "/"
         if os.path.isdir(program_to_analyze_directory):
@@ -124,7 +125,7 @@ def main3():
         sys.exit(1)
 
     while True:
-        program_to_analyze_directory = "./sample/CWE78_good"
+        program_to_analyze_directory = "./sample/CWE190_bad"
         if program_to_analyze_directory[-1] != "/":
             program_to_analyze_directory += "/"
         if os.path.isdir(program_to_analyze_directory):
@@ -174,7 +175,7 @@ def main4():
         sys.exit(1)
 
     while True:
-        program_to_analyze_directory = "./sample/CWE78_bad"
+        program_to_analyze_directory = "./sample/CWE190_good"
         if program_to_analyze_directory[-1] != "/":
             program_to_analyze_directory += "/"
         if os.path.isdir(program_to_analyze_directory):
@@ -211,6 +212,6 @@ def main4():
 
 if __name__ == "__main__":
     main1()
-    #main2()
-    main3()
-    main4()
+    main2()
+   # main3()
+   # main4()

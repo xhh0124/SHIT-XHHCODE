@@ -148,6 +148,7 @@ for gs in global_symbols:
             continue
         GLOBAL_SYMBOLS_TRACE_MAP[ref.getFromAddress()] = gs
 
+logging.disable(logging.CRITICAL) # WAITING
 
 def log_call(func, clsname=None):
     @functools.wraps(func)
@@ -487,12 +488,17 @@ class Func(object):
         if self.func_calls is not None:
             return
         instances = []
+        #logger.info("aaa begin find")
         for ref in getReferencesTo(self.entry_address):
-            if ref.getReferenceType() != RefType.UNCONDITIONAL_CALL:
+            #logger.info("aaa Find func")
+            if ref.getReferenceType() != RefType.UNCONDITIONAL_CALL and ref.getReferenceType() != RefType.COMPUTED_CALL:
+                logger.info("aaa{}".format(ref.getReferenceType()))
                 continue
+            #logger.info("aaa ok1")
             caller_func = Func.get_instance_containing(ref.getFromAddress())
             if caller_func is None:
                 continue
+            #logger.info("aaa ok2")
             for pcode_op in caller_func.get_pcode_ops():
                 if pcode_op.getOpcode() != PcodeOp.CALL:
                     continue
@@ -502,31 +508,99 @@ class Func(object):
                 if fc is None:
                     continue
                 instances.append(fc)
+            #logger.info("aaa ok3")    
         self.func_calls = instances
         return
 
     # TraceType.SameVarInFunc;when same var used multiple times in same func
     def trace_var_usage(self, node):
+        def is_related(sym_a, sym_b):
+            if not sym_a or not sym_b:
+                return False
+            if sym_a == sym_b:
+                logger.info("Directly same symbols: {} and {}".format(sym_a.getName(), sym_b.getName()))
+                return True
+            visited = set()
+            stack = [sym_a.getName()]
+            while stack:
+                cur = stack.pop()
+                if cur == sym_b.getName():
+                    logger.info("Related symbols found via graph: {} and {}".format(sym_a.getName(), sym_b.getName()))
+                    return True
+                visited.add(cur)
+                for nxt in var_graph.get(cur, []):
+                    if nxt not in visited:
+                        stack.append(nxt)
+            return False
+
+        def link_vars(sym_a, sym_b):
+            if sym_a is None or sym_b is None:
+                return
+            logger.info("Linking vars {} and {}".format(sym_a.getName(), sym_b.getName()))
+            var_graph.setdefault(sym_a.getName(), set()).add(sym_b.getName())
+            var_graph.setdefault(sym_b.getName(), set()).add(sym_a.getName())
+
+        def get_symbol(vn):
+            if hasattr(vn, "getHigh") and vn.getHigh():
+                hv = vn.getHigh()
+                if hasattr(hv, "getSymbol") and hv.getSymbol():
+                    logger.info("{}.gethigh and sym {}".format(vn, hv.getSymbol().getName()))
+                    return hv.getSymbol()
+            if hasattr(vn, "sym") and vn.sym:
+                logger.info("{}.have sym {}".format(vn, vn.sym.getName()))
+                return vn.sym
+            logger.info("{}no high no sym".format(vn))
+            return None
+
         logger.debug("Checking same usages of {} in {}".format(node, self))
-        if not self.high_func:
-            return
-        if not node.varnode:
+        if not self.high_func or not node.varnode:
             return
         # ---------- Finding same vars ---------- #
         same_vars_in_func = []
+        var_graph = {}
+        for pcode in self.get_pcode_ops():
+            opc = pcode.getOpcode()
+            logger.info("Processing pcode op: {}".format(pcode))
+            if opc not in (PcodeOp.INT_ADD, PcodeOp.INT_SUB, PcodeOp.INT_MULT, PcodeOp.INT_DIV, PcodeOp.COPY):
+                continue
+            if not pcode.output or not pcode.inputs:
+                logger.info("No output or inputs, skipping")
+                continue
+
+            # Simplify: only handle binary ops of form (var, const)
+            in_vars = []
+            consts = []
+            for inp in pcode.inputs:
+                sym = get_symbol(inp)
+                if sym:
+                    in_vars.append(inp)
+                else:
+                    consts.append(inp)
+            logger.info("BEGIN Processing pcode op {}, in_vars: {}, consts: {}".format(pcode, in_vars, consts))
+            if (len(in_vars) == 1 and len(consts) == 1) or (len(in_vars) == 2 and len(consts) == 0):
+                base_sym = get_symbol(in_vars[0])
+                derived_sym = get_symbol(pcode.output)
+                if base_sym and derived_sym:
+                    link_vars(base_sym, derived_sym)
+
         for pcode in self.get_pcode_ops():
             if pcode.getOpcode() != PcodeOp.CALL:
                 continue
             fc = FuncCall.get_instance(pcode)
             if fc is None:
                 continue
+            logger.info("{}".format(node.sym.__class__))
             for arg in fc.args:
-                if node.sym and node.sym == arg.sym:
-                    logger.debug("Found sym match to {} of {}".format(arg, fc))
+                logger.info("arg: {},{}".format(arg, arg.sym.getName() if hasattr(arg.sym, "getName") else "NoSym"))
+                logger.info("node: {},{}".format(node, node.sym.getName() if hasattr(node.sym, "getName") else "NoSym"))
+                logger.info("000:{},{}".format(arg.sym, node.sym))
+                logger.info("1111:{}".format(var_graph))
+                if node.sym and is_related(node.sym, arg.sym):
+                    logger.debug("Found sym/derived match to {} and {}".format(arg.sym.getName(), arg.sym.getName()))
                     same_vars_in_func.append(arg)
                     continue
 
-            if node.sym and node.sym == fc.output.sym:
+            if node.sym and fc.output and is_related(node.sym, fc.output.sym):
                 logger.debug("Found match to {} of {}".format(fc.output, fc))
                 same_vars_in_func.append(fc.output)
                 continue
@@ -534,6 +608,8 @@ class Func(object):
 
         # ---------- Linking traces of same vars ---------- #
         traces = [[]]
+        for i in same_vars_in_func:
+            logger.info("same:{}".format(i))
         for i in range(len(same_vars_in_func)):
             same_vars_in_func[i].is_traced_same_var = True
             if i == 0:
@@ -1209,7 +1285,7 @@ class OutputGraph(object):
                     node_fontcolor = "black"
                     if funccall.callee_func.name in SINK_FUNCS:
                         node_fontcolor = sink_color
-                    elif funccall.callee_func.name in SOURCE_FUNCS:
+                    elif any(s in funccall.callee_func.name for s in SOURCE_FUNCS):
                         node_fontcolor = source_color
                         found_source_in_path = True
 
@@ -1291,7 +1367,7 @@ class OutputGraph(object):
             if PRE_RENDER_GRAPH_PDF:
                 full_filepath = filepath_template.format("pdf")
                 logger.debug("Saving pdf graph to file ({})".format(full_filepath))
-                graph.write_pdf(full_filepath)
+        #        graph.write_pdf(full_filepath)
             logger.debug("Graph saved sucessfully")
 
             full_filepath = filepath_template.format("csv")
@@ -1349,7 +1425,7 @@ class OutputGraph(object):
                 node_fontcolor = "black"
                 if funccall.callee_func.name in SINK_FUNCS:
                     node_fontcolor = sink_color
-                elif funccall.callee_func.name in SOURCE_FUNCS:
+                elif any(s in funccall.callee_func.name for s in SOURCE_FUNCS):
                     node_fontcolor = source_color
 
                 node_funccall = pydot.Node("funccall_0x{}_{}".format(funccall.addr, funccall.callee_func.name), label=cls._format_graph_node_label(funccall, val_color), fontcolor=node_fontcolor, href=cls._format_href_to_decompiled_funcs(funccall))
@@ -1643,7 +1719,7 @@ def main():
     logger.info("Tracing end: {}".format(datetime.now()))
 
     if OUTPUT_GLOBAL_GRAPH:
-        OutputGraph.output_global()
+        pass # OutputGraph.output_global()
     if OUTPUT_INDIVIDUAL_PATHS_GRAPH:
         OutputGraph.output_individual_paths()
     if OUTPUT_DECOMPILED_C_AND_DISASSEMBLY_HTML:
@@ -1671,24 +1747,90 @@ def get_c_code_and_disasm(func_name):
 
     return results.getDecompiledFunction().getC()
 
+from collections import defaultdict
+
+def extract_source_sink_chains(fcalls):
+    SOURCE_FUNCS_TMP = set(SOURCE_FUNCS)
+    SINK_FUNCS_TMP = set(SINK_FUNCS)
+
+    all_paths = []
+    global_seen = set()
+
+    for funccalls in fcalls:
+        if not funccalls:
+            continue
+
+        forward_graph = defaultdict(set)
+        callers_of_source = defaultdict(set)
+
+        for fc in funccalls:
+            caller = fc.caller_func.name
+            callee = fc.callee_func.name
+            if caller is None or callee is None:
+                continue
+
+            forward_graph[caller].add(callee)
+            if any(s in callee for s in SOURCE_FUNCS_TMP):
+                callers_of_source[callee].add(caller)
+
+        if not callers_of_source:
+            continue
+
+        start_pairs = set()  # (source_name, caller_name)
+        caller_to_source = {}
+        for source, callers in callers_of_source.items():
+            for caller in callers:
+                if caller not in caller_to_source:
+                    caller_to_source[caller] = source
+
+        for caller, source in caller_to_source.items():
+            start_pairs.add((source, caller))
+
+        if not start_pairs:
+            continue
+
+        local_seen = set()
+
+        def dfs(current_func, path, visited):
+            neighbors = forward_graph.get(current_func, ())
+            sink_callees = [c for c in neighbors if any(s in c for s in SINK_FUNCS_TMP)]
+            if sink_callees:
+                sink_callees.sort()
+                sink = sink_callees[0]
+
+                full_path = tuple(path + [sink])
+                if full_path not in local_seen and full_path not in global_seen:
+                    local_seen.add(full_path)
+                    global_seen.add(full_path)
+                    all_paths.append(list(full_path))
+                return
+
+            for callee in neighbors:
+                if any(s in callee for s in SINK_FUNCS_TMP):
+                    continue
+
+                if callee in visited:
+                    continue
+
+                visited.add(callee)
+                dfs(callee, path + [callee], visited)
+                visited.remove(callee)
+
+        for source, caller1 in start_pairs:
+            visited = {caller1}
+            dfs(caller1, [source, caller1], visited)
+
+    return all_paths
+
 
 def extract_c(fcall):
-    def removedup(result):
-        unique_result = []
-        seen = set()
-        for chain in result:
-            t = tuple(chain)
-            if t not in seen:
-                seen.add(t)
-                unique_result.append(chain)
-        return unique_result
-
+    
     def save_callchains_to_json(callchains, output_path):
         result = {}
         for idx, chain in enumerate(callchains):
             vuln_name = "vuln{}".format(idx)
             result[vuln_name] = {("source" if i == 0 else "sink" if i == len(chain) - 1 else str(i)): (func if i == 0 or i == len(chain) - 1 else get_c_code_and_disasm(func)) for i, func in enumerate(chain)}
-
+        #print(res)
         with open(output_path, "w") as f:
             json.dump(result, f, indent=4)
 
@@ -1696,15 +1838,14 @@ def extract_c(fcall):
         print("List {}:".format(i))
         for j, call in enumerate(sublist):
             print("  [{}][{}] -> {}".format(i, j, call))
-
     # Funccall may have more than one chain, need to delete
     # But in real malware,one should have more than one chain
     result = []
     i = 0
-    for funccalls in fcall:
-        if i == 0:
-            i = 1
-            continue
+    '''for funccalls in fcall:
+        #if i == 0:
+        #    i = 1
+        #    continue
         if not funccalls:
             continue
 
@@ -1738,17 +1879,20 @@ def extract_c(fcall):
         # get source from -1
         for idx in range(len(funccalls) - 1, 0, -1):
             call = funccalls[idx]
-            if call.callee_func.name in SOURCE_FUNCS:
+            if any(s in call.callee_func.name for s in SOURCE_FUNCS):
                 chain.append(call.callee_func.name)
                 break
         # chain.append(funccalls[-1].callee_func.name) # get source
-        result.append(list(reversed(chain)))
+        result.append(list(reversed(chain)))'''
     global SAVE_PATH
     base_dir = os.path.dirname(SAVE_PATH[0])
-    output_path = os.path.join(base_dir, "vuln_output.json")
-    result[:] = [t for t in result if t and (t[0] in SOURCE_FUNCS)]
-    res = removedup(result)
-    print(res)
+    # base_dir="."
+    output_path = os.path.join(base_dir, "../vuln_output.json")
+    result[:] = [t for t in result if t and (any(s in t[0] for s in SOURCE_FUNCS))]
+    # res = removedup(result)
+    res=extract_source_sink_chains(fcall)
+    print(res) 
+    print("Total vuln chains found: {}".format(len(res)))
     save_callchains_to_json(res, output_path)
     return result
 
