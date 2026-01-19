@@ -1,0 +1,4 @@
+Caller Address,Caller Name,Caller Parameters,Callee Address,Callee Name,Callee Arguments
+00010460,FUN_00010460,,000104bc,strcpy,"local_20[12], local_14[4]"
+00010460,FUN_00010460,,00010484,strtoul,"local_c[4], UnnamedArg2, UnnamedArg3"
+00010460,FUN_00010460,,00010470,getenv,UnnamedArg1

@@ -1,0 +1,516 @@
+[2025-12-10 23:40:57,341][INFO    ][ghost.get_instance_at] Get FUNC: 0x00010328 strcpy(Param1, Param2) <=> pcVar1[4]
+[2025-12-10 23:40:57,355][INFO    ][ghost.get_instance_at] Get FUNC: 0x00022010 strcpy(Param1, Param2) <=> StatusCodeReturn
+[2025-12-10 23:40:57,367][INFO    ][ghost.get_instance_at] Get FUNC: 0x00010460 FUN_00010460() <=> UnnamedReturn
+[2025-12-10 23:40:57,368][DEBUG   ][ghost.get_instance] Get TRACEINFO: ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param1] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,369][DEBUG   ][ghost.get_instance] Get TRACEINFO: ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param2] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]]
+[2025-12-10 23:40:57,371][INFO    ][ghost.main] Current Trace Queue (len=2):
+[2025-12-10 23:40:57,372][INFO    ][ghost.main]   [0] ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param1] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,374][INFO    ][ghost.main]   [1] ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param2] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]]
+[2025-12-10 23:40:57,374][INFO    ][ghost.main] Begin Tracing ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param2] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]]
+[2025-12-10 23:40:57,375][DEBUG   ][ghost.trace_source_all] Arg trace_source_all for local_14[4] of 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut
+[2025-12-10 23:40:57,375][DEBUG   ][ghost.trace_to_func_call_output] Entering loop for getDef to find all corresponding FuncCallOutputs of varnode @ 0x00010490 in local_14[4] of 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut
+[2025-12-10 23:40:57,377][DEBUG   ][ghost.trace_to_func_call_output] Added varnode 0x00010490 (unique, 0x1000002f, 4) from pcode (register, 0x2c, 4) CAST (unique, 0x1000002f, 4)
+[2025-12-10 23:40:57,377][DEBUG   ][ghost.trace_to_func_call_output] Added varnode 0x00010484 (register, 0x20, 4) from pcode (unique, 0x1000002f, 4) INT_ADD (register, 0x20, 4) , (const, 0xb, 4)
+[2025-12-10 23:40:57,381][INFO    ][ghost.get_instance_at] Get FUNC: 0x00010358 strtoul(Param1, Param2, Param3) <=> uVar1[4]
+[2025-12-10 23:40:57,381][DEBUG   ][ghost.trace_to_func_call_output] Found trace to function call output of 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4]. Adding trace.
+[2025-12-10 23:40:57,382][DEBUG   ][ghost.get_instance] Get TRACEINFO: VarIsFuncCallOutput [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]]
+[2025-12-10 23:40:57,382][DEBUG   ][ghost.get_instance] Get TRACEINFO: ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,382][DEBUG   ][ghost.trace_var_usage] Checking same usages of local_14[4] in 0x00010460 FUN_00010460() <=> UnnamedReturn
+[2025-12-10 23:40:57,384][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x20, 4) CALL (ram, 0x10334, 8) , (unique, 0x10000027, 4)
+[2025-12-10 23:40:57,384][INFO    ][ghost.trace_var_usage] Processing pcode op: (unique, 0x10000027, 4) COPY (const, 0x10544, 4)
+[2025-12-10 23:40:57,384][INFO    ][ghost.get_symbol] (const, 0x10544, 4)no high no sym
+[2025-12-10 23:40:57,384][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (unique, 0x10000027, 4) COPY (const, 0x10544, 4), in_vars: [], consts: [(const, 0x10544, 4)]
+[2025-12-10 23:40:57,385][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x20, 4) CALL (ram, 0x10358, 8) , (register, 0x20, 4) , (const, 0x0, 4) , (const, 0xa, 4)
+[2025-12-10 23:40:57,385][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xfffffffffffffff4, 4) INDIRECT (register, 0x20, 4) , (const, 0x3e, 4)
+[2025-12-10 23:40:57,385][INFO    ][ghost.trace_var_usage] Processing pcode op: (unique, 0x1000002f, 4) INT_ADD (register, 0x20, 4) , (const, 0xb, 4)
+[2025-12-10 23:40:57,387][INFO    ][ghost.get_symbol] (register, 0x20, 4).gethigh and sym local_10
+[2025-12-10 23:40:57,387][INFO    ][ghost.get_symbol] (const, 0xb, 4)no high no sym
+[2025-12-10 23:40:57,388][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (unique, 0x1000002f, 4) INT_ADD (register, 0x20, 4) , (const, 0xb, 4), in_vars: [(register, 0x20, 4)], consts: [(const, 0xb, 4)]
+[2025-12-10 23:40:57,388][INFO    ][ghost.get_symbol] (register, 0x20, 4).gethigh and sym local_10
+[2025-12-10 23:40:57,388][INFO    ][ghost.get_symbol] (unique, 0x1000002f, 4)no high no sym
+[2025-12-10 23:40:57,388][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x2c, 4) CAST (unique, 0x1000002f, 4)
+[2025-12-10 23:40:57,388][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe2, 2) PIECE (stack, 0xffffffffffffffe3, 1) , (stack, 0xffffffffffffffe2, 1)
+[2025-12-10 23:40:57,390][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe1, 3) PIECE (stack, 0xffffffffffffffe2, 2) , (stack, 0xffffffffffffffe1, 1)
+[2025-12-10 23:40:57,390][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe0, 4) PIECE (stack, 0xffffffffffffffe1, 3) , (stack, 0xffffffffffffffe0, 1)
+[2025-12-10 23:40:57,391][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe0, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,391][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,391][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe0, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,391][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe1, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,391][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,391][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe1, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,392][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe2, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,392][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,394][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe2, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,394][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe3, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,394][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,394][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe3, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,395][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe6, 2) PIECE (stack, 0xffffffffffffffe7, 1) , (stack, 0xffffffffffffffe6, 1)
+[2025-12-10 23:40:57,395][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe5, 3) PIECE (stack, 0xffffffffffffffe6, 2) , (stack, 0xffffffffffffffe5, 1)
+[2025-12-10 23:40:57,397][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe4, 4) PIECE (stack, 0xffffffffffffffe5, 3) , (stack, 0xffffffffffffffe4, 1)
+[2025-12-10 23:40:57,397][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe4, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,398][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,398][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe4, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,398][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe5, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,398][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,398][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe5, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,400][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe6, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,400][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,401][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe6, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,401][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe7, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,401][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,401][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe7, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,401][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe8, 2) PIECE (stack, 0xffffffffffffffe9, 1) , (stack, 0xffffffffffffffe8, 1)
+[2025-12-10 23:40:57,401][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe8, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,401][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,403][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe8, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,403][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe9, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,404][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,404][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe9, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,404][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x2c, 4) PTRSUB (register, 0x54, 4) , (const, 0xffffffe0, 4)
+[2025-12-10 23:40:57,405][INFO    ][ghost.trace_var_usage] Processing pcode op:  ---  CALL (ram, 0x10328, 8) , (register, 0x2c, 4) , (register, 0x2c, 4)
+[2025-12-10 23:40:57,405][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe0, 4) INDIRECT (stack, 0xffffffffffffffe0, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,405][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe4, 4) INDIRECT (stack, 0xffffffffffffffe4, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,407][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe8, 2) INDIRECT (stack, 0xffffffffffffffe8, 2) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,407][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffec, 4) INDIRECT (register, 0x2c, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,407][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xfffffffffffffff0, 4) INDIRECT (register, 0x20, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,407][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xfffffffffffffff4, 4) INDIRECT (stack, 0xfffffffffffffff4, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,407][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x20, 4) COPY (const, 0x0, 4)
+[2025-12-10 23:40:57,408][INFO    ][ghost.get_symbol] (const, 0x0, 4)no high no sym
+[2025-12-10 23:40:57,408][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (register, 0x20, 4) COPY (const, 0x0, 4), in_vars: [], consts: [(const, 0x0, 4)]
+[2025-12-10 23:40:57,410][INFO    ][ghost.trace_var_usage] Processing pcode op:  ---  RETURN (const, 0x0, 4) , (register, 0x20, 4)
+[2025-12-10 23:40:57,414][INFO    ][ghost.get_instance_at] Get FUNC: 0x00010334 getenv(Param1) <=> pcVar1[4]
+[2025-12-10 23:40:57,414][INFO    ][ghost.trace_var_usage] <type 'ghidra.program.model.pcode.HighSymbol'>
+[2025-12-10 23:40:57,414][INFO    ][ghost.trace_var_usage] arg: UnnamedArg1,NoSym
+[2025-12-10 23:40:57,414][INFO    ][ghost.trace_var_usage] node: local_14[4],local_14
+[2025-12-10 23:40:57,415][INFO    ][ghost.trace_var_usage] 000:None,ghidra.program.model.pcode.HighSymbol@75ecdfa1
+[2025-12-10 23:40:57,415][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,417][INFO    ][ghost.trace_var_usage] <type 'ghidra.program.model.pcode.HighSymbol'>
+[2025-12-10 23:40:57,417][INFO    ][ghost.trace_var_usage] arg: local_c[4],local_c
+[2025-12-10 23:40:57,417][INFO    ][ghost.trace_var_usage] node: local_14[4],local_14
+[2025-12-10 23:40:57,417][INFO    ][ghost.trace_var_usage] 000:ghidra.program.model.pcode.HighSymbol@3a6ab683,ghidra.program.model.pcode.HighSymbol@75ecdfa1
+[2025-12-10 23:40:57,417][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,417][INFO    ][ghost.trace_var_usage] arg: UnnamedArg2,NoSym
+[2025-12-10 23:40:57,418][INFO    ][ghost.trace_var_usage] node: local_14[4],local_14
+[2025-12-10 23:40:57,418][INFO    ][ghost.trace_var_usage] 000:None,ghidra.program.model.pcode.HighSymbol@75ecdfa1
+[2025-12-10 23:40:57,418][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,420][INFO    ][ghost.trace_var_usage] arg: UnnamedArg3,NoSym
+[2025-12-10 23:40:57,420][INFO    ][ghost.trace_var_usage] node: local_14[4],local_14
+[2025-12-10 23:40:57,420][INFO    ][ghost.trace_var_usage] 000:None,ghidra.program.model.pcode.HighSymbol@75ecdfa1
+[2025-12-10 23:40:57,421][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,421][INFO    ][ghost.trace_var_usage] <type 'ghidra.program.model.pcode.HighSymbol'>
+[2025-12-10 23:40:57,421][INFO    ][ghost.trace_var_usage] arg: local_20[12],local_20
+[2025-12-10 23:40:57,421][INFO    ][ghost.trace_var_usage] node: local_14[4],local_14
+[2025-12-10 23:40:57,421][INFO    ][ghost.trace_var_usage] 000:ghidra.program.model.pcode.HighSymbol@1ebbe534,ghidra.program.model.pcode.HighSymbol@75ecdfa1
+[2025-12-10 23:40:57,423][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,423][INFO    ][ghost.trace_var_usage] arg: local_14[4],local_14
+[2025-12-10 23:40:57,423][INFO    ][ghost.trace_var_usage] node: local_14[4],local_14
+[2025-12-10 23:40:57,424][INFO    ][ghost.trace_var_usage] 000:ghidra.program.model.pcode.HighSymbol@75ecdfa1,ghidra.program.model.pcode.HighSymbol@75ecdfa1
+[2025-12-10 23:40:57,424][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,424][INFO    ][ghost.is_related] Directly same symbols: local_14 and local_14
+[2025-12-10 23:40:57,424][DEBUG   ][ghost.trace_var_usage] Found sym/derived match to local_14 and local_14
+[2025-12-10 23:40:57,424][DEBUG   ][ghost.trace_var_usage] 1 matches for trace_var_usage
+[2025-12-10 23:40:57,424][INFO    ][ghost.trace_var_usage] same:local_14[4]
+[2025-12-10 23:40:57,424][INFO    ][ghost.main] Current Trace Queue (len=3):
+[2025-12-10 23:40:57,426][INFO    ][ghost.main]   [0] ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param1] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,427][INFO    ][ghost.main]   [1] VarIsFuncCallOutput [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]]
+[2025-12-10 23:40:57,427][INFO    ][ghost.main]   [2] ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,427][INFO    ][ghost.main] Begin Tracing ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,427][DEBUG   ][ghost.trace_source_all] Arg trace_source_all for local_20[12] of 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut
+[2025-12-10 23:40:57,427][DEBUG   ][ghost.trace_to_func_call_output] Entering loop for getDef to find all corresponding FuncCallOutputs of varnode @ 0x000104b0 in local_20[12] of 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut
+[2025-12-10 23:40:57,427][DEBUG   ][ghost.trace_to_func_call_output] Added varnode 0xNO ADDRESS (register, 0x54, 4) from pcode (register, 0x2c, 4) PTRSUB (register, 0x54, 4) , (const, 0xffffffe0, 4)
+[2025-12-10 23:40:57,428][DEBUG   ][ghost.get_instance] Get TRACEINFO: ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]]
+[2025-12-10 23:40:57,428][DEBUG   ][ghost.trace_var_usage] Checking same usages of local_20[12] in 0x00010460 FUN_00010460() <=> UnnamedReturn
+[2025-12-10 23:40:57,430][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x20, 4) CALL (ram, 0x10334, 8) , (unique, 0x10000027, 4)
+[2025-12-10 23:40:57,430][INFO    ][ghost.trace_var_usage] Processing pcode op: (unique, 0x10000027, 4) COPY (const, 0x10544, 4)
+[2025-12-10 23:40:57,430][INFO    ][ghost.get_symbol] (const, 0x10544, 4)no high no sym
+[2025-12-10 23:40:57,430][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (unique, 0x10000027, 4) COPY (const, 0x10544, 4), in_vars: [], consts: [(const, 0x10544, 4)]
+[2025-12-10 23:40:57,430][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x20, 4) CALL (ram, 0x10358, 8) , (register, 0x20, 4) , (const, 0x0, 4) , (const, 0xa, 4)
+[2025-12-10 23:40:57,431][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xfffffffffffffff4, 4) INDIRECT (register, 0x20, 4) , (const, 0x3e, 4)
+[2025-12-10 23:40:57,433][INFO    ][ghost.trace_var_usage] Processing pcode op: (unique, 0x1000002f, 4) INT_ADD (register, 0x20, 4) , (const, 0xb, 4)
+[2025-12-10 23:40:57,434][INFO    ][ghost.get_symbol] (register, 0x20, 4).gethigh and sym local_10
+[2025-12-10 23:40:57,434][INFO    ][ghost.get_symbol] (const, 0xb, 4)no high no sym
+[2025-12-10 23:40:57,434][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (unique, 0x1000002f, 4) INT_ADD (register, 0x20, 4) , (const, 0xb, 4), in_vars: [(register, 0x20, 4)], consts: [(const, 0xb, 4)]
+[2025-12-10 23:40:57,434][INFO    ][ghost.get_symbol] (register, 0x20, 4).gethigh and sym local_10
+[2025-12-10 23:40:57,434][INFO    ][ghost.get_symbol] (unique, 0x1000002f, 4)no high no sym
+[2025-12-10 23:40:57,434][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x2c, 4) CAST (unique, 0x1000002f, 4)
+[2025-12-10 23:40:57,436][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe2, 2) PIECE (stack, 0xffffffffffffffe3, 1) , (stack, 0xffffffffffffffe2, 1)
+[2025-12-10 23:40:57,436][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe1, 3) PIECE (stack, 0xffffffffffffffe2, 2) , (stack, 0xffffffffffffffe1, 1)
+[2025-12-10 23:40:57,436][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe0, 4) PIECE (stack, 0xffffffffffffffe1, 3) , (stack, 0xffffffffffffffe0, 1)
+[2025-12-10 23:40:57,437][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe0, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,437][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,437][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe0, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,437][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe1, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,437][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,438][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe1, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,438][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe2, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,440][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,440][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe2, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,440][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe3, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,441][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,441][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe3, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,441][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe6, 2) PIECE (stack, 0xffffffffffffffe7, 1) , (stack, 0xffffffffffffffe6, 1)
+[2025-12-10 23:40:57,441][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe5, 3) PIECE (stack, 0xffffffffffffffe6, 2) , (stack, 0xffffffffffffffe5, 1)
+[2025-12-10 23:40:57,443][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe4, 4) PIECE (stack, 0xffffffffffffffe5, 3) , (stack, 0xffffffffffffffe4, 1)
+[2025-12-10 23:40:57,443][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe4, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,443][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,444][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe4, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,444][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe5, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,444][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,444][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe5, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,444][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe6, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,444][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,446][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe6, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,446][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe7, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,446][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,446][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe7, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,447][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe8, 2) PIECE (stack, 0xffffffffffffffe9, 1) , (stack, 0xffffffffffffffe8, 1)
+[2025-12-10 23:40:57,447][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe8, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,447][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,447][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe8, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,447][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe9, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,447][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,447][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe9, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,448][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x2c, 4) PTRSUB (register, 0x54, 4) , (const, 0xffffffe0, 4)
+[2025-12-10 23:40:57,448][INFO    ][ghost.trace_var_usage] Processing pcode op:  ---  CALL (ram, 0x10328, 8) , (register, 0x2c, 4) , (register, 0x2c, 4)
+[2025-12-10 23:40:57,448][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe0, 4) INDIRECT (stack, 0xffffffffffffffe0, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,450][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe4, 4) INDIRECT (stack, 0xffffffffffffffe4, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,450][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe8, 2) INDIRECT (stack, 0xffffffffffffffe8, 2) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,450][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffec, 4) INDIRECT (register, 0x2c, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,450][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xfffffffffffffff0, 4) INDIRECT (register, 0x20, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,450][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xfffffffffffffff4, 4) INDIRECT (stack, 0xfffffffffffffff4, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,450][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x20, 4) COPY (const, 0x0, 4)
+[2025-12-10 23:40:57,450][INFO    ][ghost.get_symbol] (const, 0x0, 4)no high no sym
+[2025-12-10 23:40:57,451][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (register, 0x20, 4) COPY (const, 0x0, 4), in_vars: [], consts: [(const, 0x0, 4)]
+[2025-12-10 23:40:57,451][INFO    ][ghost.trace_var_usage] Processing pcode op:  ---  RETURN (const, 0x0, 4) , (register, 0x20, 4)
+[2025-12-10 23:40:57,451][INFO    ][ghost.trace_var_usage] <type 'ghidra.program.model.pcode.HighSymbol'>
+[2025-12-10 23:40:57,453][INFO    ][ghost.trace_var_usage] arg: UnnamedArg1,NoSym
+[2025-12-10 23:40:57,453][INFO    ][ghost.trace_var_usage] node: local_20[12],local_20
+[2025-12-10 23:40:57,453][INFO    ][ghost.trace_var_usage] 000:None,ghidra.program.model.pcode.HighSymbol@1ebbe534
+[2025-12-10 23:40:57,453][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,453][INFO    ][ghost.trace_var_usage] <type 'ghidra.program.model.pcode.HighSymbol'>
+[2025-12-10 23:40:57,453][INFO    ][ghost.trace_var_usage] arg: local_c[4],local_c
+[2025-12-10 23:40:57,454][INFO    ][ghost.trace_var_usage] node: local_20[12],local_20
+[2025-12-10 23:40:57,454][INFO    ][ghost.trace_var_usage] 000:ghidra.program.model.pcode.HighSymbol@3a6ab683,ghidra.program.model.pcode.HighSymbol@1ebbe534
+[2025-12-10 23:40:57,454][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,454][INFO    ][ghost.trace_var_usage] arg: UnnamedArg2,NoSym
+[2025-12-10 23:40:57,456][INFO    ][ghost.trace_var_usage] node: local_20[12],local_20
+[2025-12-10 23:40:57,456][INFO    ][ghost.trace_var_usage] 000:None,ghidra.program.model.pcode.HighSymbol@1ebbe534
+[2025-12-10 23:40:57,457][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,457][INFO    ][ghost.trace_var_usage] arg: UnnamedArg3,NoSym
+[2025-12-10 23:40:57,457][INFO    ][ghost.trace_var_usage] node: local_20[12],local_20
+[2025-12-10 23:40:57,457][INFO    ][ghost.trace_var_usage] 000:None,ghidra.program.model.pcode.HighSymbol@1ebbe534
+[2025-12-10 23:40:57,457][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,457][INFO    ][ghost.trace_var_usage] <type 'ghidra.program.model.pcode.HighSymbol'>
+[2025-12-10 23:40:57,459][INFO    ][ghost.trace_var_usage] arg: local_20[12],local_20
+[2025-12-10 23:40:57,459][INFO    ][ghost.trace_var_usage] node: local_20[12],local_20
+[2025-12-10 23:40:57,459][INFO    ][ghost.trace_var_usage] 000:ghidra.program.model.pcode.HighSymbol@1ebbe534,ghidra.program.model.pcode.HighSymbol@1ebbe534
+[2025-12-10 23:40:57,459][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,460][INFO    ][ghost.is_related] Directly same symbols: local_20 and local_20
+[2025-12-10 23:40:57,460][DEBUG   ][ghost.trace_var_usage] Found sym/derived match to local_20 and local_20
+[2025-12-10 23:40:57,460][INFO    ][ghost.trace_var_usage] arg: local_14[4],local_14
+[2025-12-10 23:40:57,460][INFO    ][ghost.trace_var_usage] node: local_20[12],local_20
+[2025-12-10 23:40:57,460][INFO    ][ghost.trace_var_usage] 000:ghidra.program.model.pcode.HighSymbol@75ecdfa1,ghidra.program.model.pcode.HighSymbol@1ebbe534
+[2025-12-10 23:40:57,460][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,460][DEBUG   ][ghost.trace_var_usage] 1 matches for trace_var_usage
+[2025-12-10 23:40:57,460][INFO    ][ghost.trace_var_usage] same:local_20[12]
+[2025-12-10 23:40:57,461][INFO    ][ghost.main] Current Trace Queue (len=3):
+[2025-12-10 23:40:57,461][INFO    ][ghost.main]   [0] ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param1] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,463][INFO    ][ghost.main]   [1] VarIsFuncCallOutput [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]]
+[2025-12-10 23:40:57,463][INFO    ][ghost.main]   [2] ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]]
+[2025-12-10 23:40:57,463][INFO    ][ghost.main] Begin Tracing ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]]
+[2025-12-10 23:40:57,463][DEBUG   ][ghost.trace_source_all] Arg trace_source_all for local_14[4] of 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut
+[2025-12-10 23:40:57,463][INFO    ][ghost.main] Current Trace Queue (len=2):
+[2025-12-10 23:40:57,463][INFO    ][ghost.main]   [0] ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param1] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,463][INFO    ][ghost.main]   [1] VarIsFuncCallOutput [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]]
+[2025-12-10 23:40:57,464][INFO    ][ghost.main] Begin Tracing VarIsFuncCallOutput [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]]
+[2025-12-10 23:40:57,464][DEBUG   ][ghost.trace_source_all] FuncCallOutput trace_source_all for local_10[4] of 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4]
+[2025-12-10 23:40:57,466][DEBUG   ][ghost.get_instance] Get TRACEINFO: FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]]
+[2025-12-10 23:40:57,466][DEBUG   ][ghost.get_instance] Get TRACEINFO: FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | UnnamedArg3]
+[2025-12-10 23:40:57,466][INFO    ][ghost.main] Current Trace Queue (len=3):
+[2025-12-10 23:40:57,466][INFO    ][ghost.main]   [0] ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param1] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,467][INFO    ][ghost.main]   [1] FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]]
+[2025-12-10 23:40:57,467][INFO    ][ghost.main]   [2] FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | UnnamedArg3]
+[2025-12-10 23:40:57,467][INFO    ][ghost.main] Begin Tracing FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | UnnamedArg3]
+[2025-12-10 23:40:57,467][DEBUG   ][ghost.trace_source_all] Arg trace_source_all for UnnamedArg3 of 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4]
+[2025-12-10 23:40:57,467][DEBUG   ][ghost.trace_to_func_call_output] Entering loop for getDef to find all corresponding FuncCallOutputs of varnode @ 0x00010484 in UnnamedArg3 of 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4]
+[2025-12-10 23:40:57,467][DEBUG   ][ghost.trace_var_usage] Checking same usages of UnnamedArg3 in 0x00010460 FUN_00010460() <=> UnnamedReturn
+[2025-12-10 23:40:57,467][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x20, 4) CALL (ram, 0x10334, 8) , (unique, 0x10000027, 4)
+[2025-12-10 23:40:57,469][INFO    ][ghost.trace_var_usage] Processing pcode op: (unique, 0x10000027, 4) COPY (const, 0x10544, 4)
+[2025-12-10 23:40:57,469][INFO    ][ghost.get_symbol] (const, 0x10544, 4)no high no sym
+[2025-12-10 23:40:57,470][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (unique, 0x10000027, 4) COPY (const, 0x10544, 4), in_vars: [], consts: [(const, 0x10544, 4)]
+[2025-12-10 23:40:57,470][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x20, 4) CALL (ram, 0x10358, 8) , (register, 0x20, 4) , (const, 0x0, 4) , (const, 0xa, 4)
+[2025-12-10 23:40:57,470][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xfffffffffffffff4, 4) INDIRECT (register, 0x20, 4) , (const, 0x3e, 4)
+[2025-12-10 23:40:57,470][INFO    ][ghost.trace_var_usage] Processing pcode op: (unique, 0x1000002f, 4) INT_ADD (register, 0x20, 4) , (const, 0xb, 4)
+[2025-12-10 23:40:57,470][INFO    ][ghost.get_symbol] (register, 0x20, 4).gethigh and sym local_10
+[2025-12-10 23:40:57,470][INFO    ][ghost.get_symbol] (const, 0xb, 4)no high no sym
+[2025-12-10 23:40:57,471][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (unique, 0x1000002f, 4) INT_ADD (register, 0x20, 4) , (const, 0xb, 4), in_vars: [(register, 0x20, 4)], consts: [(const, 0xb, 4)]
+[2025-12-10 23:40:57,471][INFO    ][ghost.get_symbol] (register, 0x20, 4).gethigh and sym local_10
+[2025-12-10 23:40:57,471][INFO    ][ghost.get_symbol] (unique, 0x1000002f, 4)no high no sym
+[2025-12-10 23:40:57,471][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x2c, 4) CAST (unique, 0x1000002f, 4)
+[2025-12-10 23:40:57,473][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe2, 2) PIECE (stack, 0xffffffffffffffe3, 1) , (stack, 0xffffffffffffffe2, 1)
+[2025-12-10 23:40:57,473][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe1, 3) PIECE (stack, 0xffffffffffffffe2, 2) , (stack, 0xffffffffffffffe1, 1)
+[2025-12-10 23:40:57,473][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe0, 4) PIECE (stack, 0xffffffffffffffe1, 3) , (stack, 0xffffffffffffffe0, 1)
+[2025-12-10 23:40:57,473][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe0, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,473][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,473][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe0, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,473][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe1, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,474][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,474][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe1, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,474][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe2, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,474][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,476][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe2, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,476][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe3, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,476][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,476][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe3, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,476][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe6, 2) PIECE (stack, 0xffffffffffffffe7, 1) , (stack, 0xffffffffffffffe6, 1)
+[2025-12-10 23:40:57,476][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe5, 3) PIECE (stack, 0xffffffffffffffe6, 2) , (stack, 0xffffffffffffffe5, 1)
+[2025-12-10 23:40:57,476][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe4, 4) PIECE (stack, 0xffffffffffffffe5, 3) , (stack, 0xffffffffffffffe4, 1)
+[2025-12-10 23:40:57,476][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe4, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,476][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,477][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe4, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,477][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe5, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,477][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,477][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe5, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,479][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe6, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,479][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,479][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe6, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,479][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe7, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,480][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,480][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe7, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,480][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe8, 2) PIECE (stack, 0xffffffffffffffe9, 1) , (stack, 0xffffffffffffffe8, 1)
+[2025-12-10 23:40:57,480][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe8, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,480][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,480][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe8, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,480][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe9, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,482][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,482][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe9, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,483][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x2c, 4) PTRSUB (register, 0x54, 4) , (const, 0xffffffe0, 4)
+[2025-12-10 23:40:57,483][INFO    ][ghost.trace_var_usage] Processing pcode op:  ---  CALL (ram, 0x10328, 8) , (register, 0x2c, 4) , (register, 0x2c, 4)
+[2025-12-10 23:40:57,483][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe0, 4) INDIRECT (stack, 0xffffffffffffffe0, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,483][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe4, 4) INDIRECT (stack, 0xffffffffffffffe4, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,484][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe8, 2) INDIRECT (stack, 0xffffffffffffffe8, 2) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,484][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffec, 4) INDIRECT (register, 0x2c, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,484][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xfffffffffffffff0, 4) INDIRECT (register, 0x20, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,486][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xfffffffffffffff4, 4) INDIRECT (stack, 0xfffffffffffffff4, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,486][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x20, 4) COPY (const, 0x0, 4)
+[2025-12-10 23:40:57,486][INFO    ][ghost.get_symbol] (const, 0x0, 4)no high no sym
+[2025-12-10 23:40:57,486][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (register, 0x20, 4) COPY (const, 0x0, 4), in_vars: [], consts: [(const, 0x0, 4)]
+[2025-12-10 23:40:57,486][INFO    ][ghost.trace_var_usage] Processing pcode op:  ---  RETURN (const, 0x0, 4) , (register, 0x20, 4)
+[2025-12-10 23:40:57,486][INFO    ][ghost.trace_var_usage] <type 'NoneType'>
+[2025-12-10 23:40:57,487][INFO    ][ghost.trace_var_usage] arg: UnnamedArg1,NoSym
+[2025-12-10 23:40:57,487][INFO    ][ghost.trace_var_usage] node: UnnamedArg3,NoSym
+[2025-12-10 23:40:57,487][INFO    ][ghost.trace_var_usage] 000:None,None
+[2025-12-10 23:40:57,487][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,489][INFO    ][ghost.trace_var_usage] <type 'NoneType'>
+[2025-12-10 23:40:57,489][INFO    ][ghost.trace_var_usage] arg: local_c[4],local_c
+[2025-12-10 23:40:57,489][INFO    ][ghost.trace_var_usage] node: UnnamedArg3,NoSym
+[2025-12-10 23:40:57,489][INFO    ][ghost.trace_var_usage] 000:ghidra.program.model.pcode.HighSymbol@3a6ab683,None
+[2025-12-10 23:40:57,490][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,490][INFO    ][ghost.trace_var_usage] arg: UnnamedArg2,NoSym
+[2025-12-10 23:40:57,490][INFO    ][ghost.trace_var_usage] node: UnnamedArg3,NoSym
+[2025-12-10 23:40:57,490][INFO    ][ghost.trace_var_usage] 000:None,None
+[2025-12-10 23:40:57,490][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,490][INFO    ][ghost.trace_var_usage] arg: UnnamedArg3,NoSym
+[2025-12-10 23:40:57,490][INFO    ][ghost.trace_var_usage] node: UnnamedArg3,NoSym
+[2025-12-10 23:40:57,490][INFO    ][ghost.trace_var_usage] 000:None,None
+[2025-12-10 23:40:57,490][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,492][INFO    ][ghost.trace_var_usage] <type 'NoneType'>
+[2025-12-10 23:40:57,492][INFO    ][ghost.trace_var_usage] arg: local_20[12],local_20
+[2025-12-10 23:40:57,493][INFO    ][ghost.trace_var_usage] node: UnnamedArg3,NoSym
+[2025-12-10 23:40:57,493][INFO    ][ghost.trace_var_usage] 000:ghidra.program.model.pcode.HighSymbol@1ebbe534,None
+[2025-12-10 23:40:57,493][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,493][INFO    ][ghost.trace_var_usage] arg: local_14[4],local_14
+[2025-12-10 23:40:57,493][INFO    ][ghost.trace_var_usage] node: UnnamedArg3,NoSym
+[2025-12-10 23:40:57,493][INFO    ][ghost.trace_var_usage] 000:ghidra.program.model.pcode.HighSymbol@75ecdfa1,None
+[2025-12-10 23:40:57,493][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,494][DEBUG   ][ghost.trace_var_usage] 0 matches for trace_var_usage
+[2025-12-10 23:40:57,494][INFO    ][ghost.main] Current Trace Queue (len=2):
+[2025-12-10 23:40:57,494][INFO    ][ghost.main]   [0] ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param1] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,494][INFO    ][ghost.main]   [1] FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]]
+[2025-12-10 23:40:57,496][INFO    ][ghost.main] Begin Tracing FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]]
+[2025-12-10 23:40:57,496][DEBUG   ][ghost.trace_source_all] Arg trace_source_all for local_c[4] of 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4]
+[2025-12-10 23:40:57,496][DEBUG   ][ghost.trace_to_func_call_output] Entering loop for getDef to find all corresponding FuncCallOutputs of varnode @ 0x00010470 in local_c[4] of 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4]
+[2025-12-10 23:40:57,496][DEBUG   ][ghost.trace_to_func_call_output] Found trace to function call output of 0x00010470 getenv(UnnamedArg1) <=> local_c[4]. Adding trace.
+[2025-12-10 23:40:57,496][DEBUG   ][ghost.get_instance] Get TRACEINFO: VarIsFuncCallOutput [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]] --> [Out:0x00010470 getenv(UnnamedArg1) <=> local_c[4] | local_c[4]]
+[2025-12-10 23:40:57,496][DEBUG   ][ghost.trace_var_usage] Checking same usages of local_c[4] in 0x00010460 FUN_00010460() <=> UnnamedReturn
+[2025-12-10 23:40:57,496][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x20, 4) CALL (ram, 0x10334, 8) , (unique, 0x10000027, 4)
+[2025-12-10 23:40:57,496][INFO    ][ghost.trace_var_usage] Processing pcode op: (unique, 0x10000027, 4) COPY (const, 0x10544, 4)
+[2025-12-10 23:40:57,497][INFO    ][ghost.get_symbol] (const, 0x10544, 4)no high no sym
+[2025-12-10 23:40:57,497][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (unique, 0x10000027, 4) COPY (const, 0x10544, 4), in_vars: [], consts: [(const, 0x10544, 4)]
+[2025-12-10 23:40:57,497][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x20, 4) CALL (ram, 0x10358, 8) , (register, 0x20, 4) , (const, 0x0, 4) , (const, 0xa, 4)
+[2025-12-10 23:40:57,497][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xfffffffffffffff4, 4) INDIRECT (register, 0x20, 4) , (const, 0x3e, 4)
+[2025-12-10 23:40:57,499][INFO    ][ghost.trace_var_usage] Processing pcode op: (unique, 0x1000002f, 4) INT_ADD (register, 0x20, 4) , (const, 0xb, 4)
+[2025-12-10 23:40:57,499][INFO    ][ghost.get_symbol] (register, 0x20, 4).gethigh and sym local_10
+[2025-12-10 23:40:57,499][INFO    ][ghost.get_symbol] (const, 0xb, 4)no high no sym
+[2025-12-10 23:40:57,500][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (unique, 0x1000002f, 4) INT_ADD (register, 0x20, 4) , (const, 0xb, 4), in_vars: [(register, 0x20, 4)], consts: [(const, 0xb, 4)]
+[2025-12-10 23:40:57,500][INFO    ][ghost.get_symbol] (register, 0x20, 4).gethigh and sym local_10
+[2025-12-10 23:40:57,500][INFO    ][ghost.get_symbol] (unique, 0x1000002f, 4)no high no sym
+[2025-12-10 23:40:57,500][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x2c, 4) CAST (unique, 0x1000002f, 4)
+[2025-12-10 23:40:57,500][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe2, 2) PIECE (stack, 0xffffffffffffffe3, 1) , (stack, 0xffffffffffffffe2, 1)
+[2025-12-10 23:40:57,500][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe1, 3) PIECE (stack, 0xffffffffffffffe2, 2) , (stack, 0xffffffffffffffe1, 1)
+[2025-12-10 23:40:57,500][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe0, 4) PIECE (stack, 0xffffffffffffffe1, 3) , (stack, 0xffffffffffffffe0, 1)
+[2025-12-10 23:40:57,500][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe0, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,500][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,502][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe0, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,502][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe1, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,502][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,502][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe1, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,502][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe2, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,503][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,503][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe2, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,503][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe3, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,503][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,503][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe3, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,503][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe6, 2) PIECE (stack, 0xffffffffffffffe7, 1) , (stack, 0xffffffffffffffe6, 1)
+[2025-12-10 23:40:57,505][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe5, 3) PIECE (stack, 0xffffffffffffffe6, 2) , (stack, 0xffffffffffffffe5, 1)
+[2025-12-10 23:40:57,505][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe4, 4) PIECE (stack, 0xffffffffffffffe5, 3) , (stack, 0xffffffffffffffe4, 1)
+[2025-12-10 23:40:57,505][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe4, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,505][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,506][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe4, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,506][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe5, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,506][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,506][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe5, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,506][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe6, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,506][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,506][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe6, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,506][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe7, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,507][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,507][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe7, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,507][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe8, 2) PIECE (stack, 0xffffffffffffffe9, 1) , (stack, 0xffffffffffffffe8, 1)
+[2025-12-10 23:40:57,507][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe8, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,509][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,509][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe8, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,509][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe9, 1) COPY (const, 0x0, 1)
+[2025-12-10 23:40:57,509][INFO    ][ghost.get_symbol] (const, 0x0, 1)no high no sym
+[2025-12-10 23:40:57,509][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (stack, 0xffffffffffffffe9, 1) COPY (const, 0x0, 1), in_vars: [], consts: [(const, 0x0, 1)]
+[2025-12-10 23:40:57,509][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x2c, 4) PTRSUB (register, 0x54, 4) , (const, 0xffffffe0, 4)
+[2025-12-10 23:40:57,509][INFO    ][ghost.trace_var_usage] Processing pcode op:  ---  CALL (ram, 0x10328, 8) , (register, 0x2c, 4) , (register, 0x2c, 4)
+[2025-12-10 23:40:57,509][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe0, 4) INDIRECT (stack, 0xffffffffffffffe0, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,509][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe4, 4) INDIRECT (stack, 0xffffffffffffffe4, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,510][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffe8, 2) INDIRECT (stack, 0xffffffffffffffe8, 2) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,510][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xffffffffffffffec, 4) INDIRECT (register, 0x2c, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,512][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xfffffffffffffff0, 4) INDIRECT (register, 0x20, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,512][INFO    ][ghost.trace_var_usage] Processing pcode op: (stack, 0xfffffffffffffff4, 4) INDIRECT (stack, 0xfffffffffffffff4, 4) , (const, 0x8c, 4)
+[2025-12-10 23:40:57,512][INFO    ][ghost.trace_var_usage] Processing pcode op: (register, 0x20, 4) COPY (const, 0x0, 4)
+[2025-12-10 23:40:57,513][INFO    ][ghost.get_symbol] (const, 0x0, 4)no high no sym
+[2025-12-10 23:40:57,513][INFO    ][ghost.trace_var_usage] BEGIN Processing pcode op (register, 0x20, 4) COPY (const, 0x0, 4), in_vars: [], consts: [(const, 0x0, 4)]
+[2025-12-10 23:40:57,513][INFO    ][ghost.trace_var_usage] Processing pcode op:  ---  RETURN (const, 0x0, 4) , (register, 0x20, 4)
+[2025-12-10 23:40:57,513][INFO    ][ghost.trace_var_usage] <type 'ghidra.program.model.pcode.HighSymbol'>
+[2025-12-10 23:40:57,513][INFO    ][ghost.trace_var_usage] arg: UnnamedArg1,NoSym
+[2025-12-10 23:40:57,513][INFO    ][ghost.trace_var_usage] node: local_c[4],local_c
+[2025-12-10 23:40:57,513][INFO    ][ghost.trace_var_usage] 000:None,ghidra.program.model.pcode.HighSymbol@3a6ab683
+[2025-12-10 23:40:57,513][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,515][INFO    ][ghost.is_related] Directly same symbols: local_c and local_c
+[2025-12-10 23:40:57,515][DEBUG   ][ghost.trace_var_usage] Found match to local_c[4] of 0x00010470 getenv(UnnamedArg1) <=> local_c[4]
+[2025-12-10 23:40:57,515][INFO    ][ghost.trace_var_usage] <type 'ghidra.program.model.pcode.HighSymbol'>
+[2025-12-10 23:40:57,515][INFO    ][ghost.trace_var_usage] arg: local_c[4],local_c
+[2025-12-10 23:40:57,516][INFO    ][ghost.trace_var_usage] node: local_c[4],local_c
+[2025-12-10 23:40:57,516][INFO    ][ghost.trace_var_usage] 000:ghidra.program.model.pcode.HighSymbol@3a6ab683,ghidra.program.model.pcode.HighSymbol@3a6ab683
+[2025-12-10 23:40:57,516][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,516][INFO    ][ghost.is_related] Directly same symbols: local_c and local_c
+[2025-12-10 23:40:57,516][DEBUG   ][ghost.trace_var_usage] Found sym/derived match to local_c and local_c
+[2025-12-10 23:40:57,516][INFO    ][ghost.trace_var_usage] arg: UnnamedArg2,NoSym
+[2025-12-10 23:40:57,516][INFO    ][ghost.trace_var_usage] node: local_c[4],local_c
+[2025-12-10 23:40:57,516][INFO    ][ghost.trace_var_usage] 000:None,ghidra.program.model.pcode.HighSymbol@3a6ab683
+[2025-12-10 23:40:57,516][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,516][INFO    ][ghost.trace_var_usage] arg: UnnamedArg3,NoSym
+[2025-12-10 23:40:57,516][INFO    ][ghost.trace_var_usage] node: local_c[4],local_c
+[2025-12-10 23:40:57,517][INFO    ][ghost.trace_var_usage] 000:None,ghidra.program.model.pcode.HighSymbol@3a6ab683
+[2025-12-10 23:40:57,517][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,517][INFO    ][ghost.trace_var_usage] <type 'ghidra.program.model.pcode.HighSymbol'>
+[2025-12-10 23:40:57,519][INFO    ][ghost.trace_var_usage] arg: local_20[12],local_20
+[2025-12-10 23:40:57,519][INFO    ][ghost.trace_var_usage] node: local_c[4],local_c
+[2025-12-10 23:40:57,519][INFO    ][ghost.trace_var_usage] 000:ghidra.program.model.pcode.HighSymbol@1ebbe534,ghidra.program.model.pcode.HighSymbol@3a6ab683
+[2025-12-10 23:40:57,519][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,519][INFO    ][ghost.trace_var_usage] arg: local_14[4],local_14
+[2025-12-10 23:40:57,519][INFO    ][ghost.trace_var_usage] node: local_c[4],local_c
+[2025-12-10 23:40:57,519][INFO    ][ghost.trace_var_usage] 000:ghidra.program.model.pcode.HighSymbol@75ecdfa1,ghidra.program.model.pcode.HighSymbol@3a6ab683
+[2025-12-10 23:40:57,519][INFO    ][ghost.trace_var_usage] 1111:{}
+[2025-12-10 23:40:57,519][DEBUG   ][ghost.trace_var_usage] 2 matches for trace_var_usage
+[2025-12-10 23:40:57,519][INFO    ][ghost.trace_var_usage] same:local_c[4]
+[2025-12-10 23:40:57,519][INFO    ][ghost.trace_var_usage] same:local_c[4]
+[2025-12-10 23:40:57,520][INFO    ][ghost.main] Current Trace Queue (len=2):
+[2025-12-10 23:40:57,520][INFO    ][ghost.main]   [0] ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param1] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,520][INFO    ][ghost.main]   [1] VarIsFuncCallOutput [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]] --> [Out:0x00010470 getenv(UnnamedArg1) <=> local_c[4] | local_c[4]]
+[2025-12-10 23:40:57,520][INFO    ][ghost.main] Begin Tracing VarIsFuncCallOutput [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]] --> [Out:0x00010470 getenv(UnnamedArg1) <=> local_c[4] | local_c[4]]
+[2025-12-10 23:40:57,522][DEBUG   ][ghost.trace_source_all] FuncCallOutput trace_source_all for local_c[4] of 0x00010470 getenv(UnnamedArg1) <=> local_c[4]
+[2025-12-10 23:40:57,522][INFO    ][ghost.main] Current Trace Queue (len=1):
+[2025-12-10 23:40:57,522][INFO    ][ghost.main]   [0] ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param1] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,522][INFO    ][ghost.main] Begin Tracing ParamToArg [Par:0x00010328 strcpy(Param1, Param2) <=> pcVar1[4] | Param1] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,523][DEBUG   ][ghost.trace_source_all] Arg trace_source_all for local_20[12] of 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut
+[2025-12-10 23:40:57,523][INFO    ][ghost.main] Tracing end: 2025-12-10 23:40:57.523000
+[2025-12-10 23:40:57,523][INFO    ][ghost._get_all_individual_path_traces] Processing paths...
+[2025-12-10 23:40:57,523][DEBUG   ][ghost._get_all_individual_path_traces] Checking if path list is empty
+[2025-12-10 23:40:57,523][DEBUG   ][ghost._get_all_individual_path_traces] Next node to add to path: local_20[12]
+[2025-12-10 23:40:57,523][DEBUG   ][ghost._get_all_individual_path_traces] Checking duplicates in next_node's forward traces: [ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]]]
+[2025-12-10 23:40:57,525][DEBUG   ][ghost._get_all_individual_path_traces] Added next_node's forward traces: [ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]]]
+[2025-12-10 23:40:57,525][DEBUG   ][ghost._get_all_individual_path_traces] Checking if path list is empty
+[2025-12-10 23:40:57,525][DEBUG   ][ghost._get_all_individual_path_traces] Next node to add to path: local_14[4]
+[2025-12-10 23:40:57,526][DEBUG   ][ghost._get_all_individual_path_traces] Checking duplicates in next_node's forward traces: [VarIsFuncCallOutput [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]], ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]]
+[2025-12-10 23:40:57,526][DEBUG   ][ghost._get_all_individual_path_traces] Removing duplicate node from next traces (already under current path): ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]
+[2025-12-10 23:40:57,526][DEBUG   ][ghost._get_all_individual_path_traces] Added next_node's forward traces: [VarIsFuncCallOutput [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]], ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]]]
+[2025-12-10 23:40:57,526][DEBUG   ][ghost._get_all_individual_path_traces] Checking if path list is empty
+[2025-12-10 23:40:57,528][DEBUG   ][ghost._get_all_individual_path_traces] Next node to add to path: local_10[4]
+[2025-12-10 23:40:57,528][DEBUG   ][ghost._get_all_individual_path_traces] Checking duplicates in next_node's forward traces: [FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]], FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | UnnamedArg3]]
+[2025-12-10 23:40:57,528][DEBUG   ][ghost._get_all_individual_path_traces] Added next_node's forward traces: [FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]], FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | UnnamedArg3]]
+[2025-12-10 23:40:57,528][DEBUG   ][ghost._get_all_individual_path_traces] Checking if path list is empty
+[2025-12-10 23:40:57,529][DEBUG   ][ghost._get_all_individual_path_traces] Next node to add to path: UnnamedArg3
+[2025-12-10 23:40:57,529][DEBUG   ][ghost._get_all_individual_path_traces] next_node's forward traces are now empty! End of path has been reached. Saving full path.
+[2025-12-10 23:40:57,529][DEBUG   ][ghost._get_all_individual_path_traces] Removed latest path node
+[2025-12-10 23:40:57,529][DEBUG   ][ghost._get_all_individual_path_traces] Checking if path list is empty
+[2025-12-10 23:40:57,529][DEBUG   ][ghost._get_all_individual_path_traces] Next node to add to path: local_c[4]
+[2025-12-10 23:40:57,529][DEBUG   ][ghost._get_all_individual_path_traces] Checking duplicates in next_node's forward traces: [VarIsFuncCallOutput [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]] --> [Out:0x00010470 getenv(UnnamedArg1) <=> local_c[4] | local_c[4]]]
+[2025-12-10 23:40:57,529][DEBUG   ][ghost._get_all_individual_path_traces] Added next_node's forward traces: [VarIsFuncCallOutput [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]] --> [Out:0x00010470 getenv(UnnamedArg1) <=> local_c[4] | local_c[4]]]
+[2025-12-10 23:40:57,529][DEBUG   ][ghost._get_all_individual_path_traces] Checking if path list is empty
+[2025-12-10 23:40:57,529][DEBUG   ][ghost._get_all_individual_path_traces] Next node to add to path: local_c[4]
+[2025-12-10 23:40:57,530][DEBUG   ][ghost._get_all_individual_path_traces] next_node's forward traces are now empty! End of path has been reached. Saving full path.
+[2025-12-10 23:40:57,530][DEBUG   ][ghost._get_all_individual_path_traces] Removed latest path node
+[2025-12-10 23:40:57,530][DEBUG   ][ghost._get_all_individual_path_traces] Checking if path list is empty
+[2025-12-10 23:40:57,530][DEBUG   ][ghost._get_all_individual_path_traces] Latest path list was empty; removed.
+[2025-12-10 23:40:57,530][DEBUG   ][ghost._get_all_individual_path_traces] Removed corresponding path node as well
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Checking if path list is empty
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Latest path list was empty; removed.
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Removed corresponding path node as well
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Checking if path list is empty
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Latest path list was empty; removed.
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Removed corresponding path node as well
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Checking if path list is empty
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Latest path list was empty; removed.
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Removed corresponding path node as well
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Checking if path list is empty
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Next node to add to path: local_10[4]
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Found previously completed segment trace
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Full paths have been saved from cached segment trace
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Removed latest path node
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Checking if path list is empty
+[2025-12-10 23:40:57,532][DEBUG   ][ghost._get_all_individual_path_traces] Latest path list was empty; removed.
+[2025-12-10 23:40:57,533][DEBUG   ][ghost._get_all_individual_path_traces] All 3 paths have been found for source var: local_14[4]
+[2025-12-10 23:40:57,533][INFO    ][ghost.output_individual_paths] Outputting paths 1/2
+[2025-12-10 23:40:57,538][DEBUG   ][ghost.output_individual_paths] Graphing TraceInfo ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]] | Source parent: 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut, Sink parent: 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut
+[2025-12-10 23:40:57,539][DEBUG   ][ghost.output_individual_paths] Graphing TraceInfo ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] | Source parent: 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut, Sink parent: 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut
+[2025-12-10 23:40:57,539][DEBUG   ][ghost.output_individual_paths] Graphing TraceInfo VarIsFuncCallOutput [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] | Source parent: 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4], Sink parent: 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut
+[2025-12-10 23:40:57,539][DEBUG   ][ghost.output_individual_paths] Graphing TraceInfo FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | UnnamedArg3] | Source parent: 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4], Sink parent: 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4]
+[2025-12-10 23:40:57,540][DEBUG   ][ghost.output_individual_paths] Saving raw dot graph to file (Unknown/SplitPath-0x000104bc_strcpy_arg1-to-0x00010484_strtoul_arg2-48146e46ca844a8b974f6630d5525b36.dot)
+[2025-12-10 23:40:57,540][DEBUG   ][ghost.output_individual_paths] Graph saved sucessfully
+[2025-12-10 23:40:57,540][DEBUG   ][ghost.output_individual_paths] Graph saved sucessfully
+[2025-12-10 23:40:57,540][DEBUG   ][ghost.output_individual_paths] Graph saved sucessfully
+[2025-12-10 23:40:57,540][DEBUG   ][ghost.output_individual_paths] Saving pdf graph to file (Unknown/SplitPath-0x000104bc_strcpy_arg1-to-0x00010484_strtoul_arg2-48146e46ca844a8b974f6630d5525b36.pdf)
+[2025-12-10 23:40:57,540][DEBUG   ][ghost.output_individual_paths] Graph saved sucessfully
+[2025-12-10 23:40:57,542][DEBUG   ][ghost.output_individual_paths] Saving csv to file (Unknown/SplitPath-0x000104bc_strcpy_arg1-to-0x00010484_strtoul_arg2-48146e46ca844a8b974f6630d5525b36.csv)
+[2025-12-10 23:40:57,543][DEBUG   ][ghost.output_individual_paths] CSV saved sucessfully
+[2025-12-10 23:40:57,543][INFO    ][ghost.output_individual_paths] Outputting paths 2/2
+[2025-12-10 23:40:57,546][DEBUG   ][ghost.output_individual_paths] Graphing TraceInfo ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]] | Source parent: 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut, Sink parent: 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut
+[2025-12-10 23:40:57,548][DEBUG   ][ghost.output_individual_paths] Graphing TraceInfo ArgToOtherArgs [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_20[12]] --> [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] | Source parent: 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut, Sink parent: 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut
+[2025-12-10 23:40:57,548][DEBUG   ][ghost.output_individual_paths] Graphing TraceInfo VarIsFuncCallOutput [Arg:0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut | local_14[4]] --> [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] | Source parent: 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4], Sink parent: 0x000104bc strcpy(local_20[12], local_14[4]) <=> UnnamedOut
+[2025-12-10 23:40:57,549][DEBUG   ][ghost.output_individual_paths] Graphing TraceInfo FuncCallOutputToArgs [Out:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_10[4]] --> [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]] | Source parent: 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4], Sink parent: 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4]
+[2025-12-10 23:40:57,549][DEBUG   ][ghost.output_individual_paths] Graphing TraceInfo VarIsFuncCallOutput [Arg:0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4] | local_c[4]] --> [Out:0x00010470 getenv(UnnamedArg1) <=> local_c[4] | local_c[4]] | Source parent: 0x00010470 getenv(UnnamedArg1) <=> local_c[4], Sink parent: 0x00010484 strtoul(local_c[4], UnnamedArg2, UnnamedArg3) <=> local_10[4]
+[2025-12-10 23:40:57,549][DEBUG   ][ghost.output_individual_paths] Saving raw dot graph to file (Potentially Vulnerable/SplitPath-0x000104bc_strcpy_arg1-to-0x00010470_getenv_funccall-cf46b52848ee4563b44333403e8faa76.dot)
+[2025-12-10 23:40:57,549][DEBUG   ][ghost.output_individual_paths] Graph saved sucessfully
+[2025-12-10 23:40:57,549][DEBUG   ][ghost.output_individual_paths] Graph saved sucessfully
+[2025-12-10 23:40:57,549][DEBUG   ][ghost.output_individual_paths] Graph saved sucessfully
+[2025-12-10 23:40:57,549][DEBUG   ][ghost.output_individual_paths] Saving pdf graph to file (Potentially Vulnerable/SplitPath-0x000104bc_strcpy_arg1-to-0x00010470_getenv_funccall-cf46b52848ee4563b44333403e8faa76.pdf)
+[2025-12-10 23:40:57,551][DEBUG   ][ghost.output_individual_paths] Graph saved sucessfully
+[2025-12-10 23:40:57,551][DEBUG   ][ghost.output_individual_paths] Saving csv to file (Potentially Vulnerable/SplitPath-0x000104bc_strcpy_arg1-to-0x00010470_getenv_funccall-cf46b52848ee4563b44333403e8faa76.csv)
+[2025-12-10 23:40:57,551][DEBUG   ][ghost.output_individual_paths] CSV saved sucessfully
+[2025-12-10 23:40:57,551][INFO    ][ghost.output_individual_paths] All paths have been output.
+[2025-12-10 23:40:57,611][INFO    ][ghost.main] Output completed: 2025-12-10 23:40:57.611000

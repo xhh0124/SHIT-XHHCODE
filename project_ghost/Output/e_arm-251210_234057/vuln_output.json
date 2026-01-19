@@ -1,0 +1,7 @@
+{
+    "vuln0": {
+        "sink": "strcpy", 
+        "source": "getenv", 
+        "1": "\nundefined4 FUN_00010460(void)\n\n{\n  char local_20 [12];\n  char *local_14;\n  ulong local_10;\n  char *local_c;\n  \n  local_c = getenv(\"USR\");\n  local_10 = strtoul(local_c,(char **)0x0,10);\n  local_14 = (char *)(local_10 + 0xb);\n  local_20[0] = '\\0';\n  local_20[1] = '\\0';\n  local_20[2] = '\\0';\n  local_20[3] = '\\0';\n  local_20[4] = '\\0';\n  local_20[5] = '\\0';\n  local_20[6] = '\\0';\n  local_20[7] = '\\0';\n  local_20[8] = '\\0';\n  local_20[9] = '\\0';\n  strcpy(local_20,local_14);\n  return 0;\n}\n\n"
+    }
+}
