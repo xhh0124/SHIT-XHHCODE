@@ -1,0 +1,8 @@
+sh ./ghidra/support/analyzeHeadless ./sample/ temporaryProjectA \
+  -import ./sample/httpd \
+  -scriptPath /home/xuehuanhuan/2.LATTE/project_ghost \
+  -preScript ghidra_analysis_options_prescript.py \
+  -postScript ghost.py \
+  -deleteProject
+
+ sh ./ghidra/support/analyzeHeadless a.py

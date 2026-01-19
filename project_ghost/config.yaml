@@ -1,0 +1,228 @@
+# ------- Various Output Formats & Options (Will increase compute time) ------- #
+pre_render_graph_svg: false
+pre_render_graph_pdf: true
+pre_render_graph_png: false
+output_decompiled_c_and_disassembly_html: true
+
+output_individual_paths_graph: true
+output_global_graph: true
+split_global_graph_by_funcs: false # for easy computing
+output_relative_paths: true 
+
+# ---------------------------- Sink & Source Config ---------------------------- #
+
+# Sink functions to start the sink-to-source tracing from. 
+# Also specify the target parameter to trace, or leave empty to trace all parameters.
+sink_functions:
+  # E.g. strcpy(dest, src)
+  strcpy:   # Function name
+  - 1       # src is index 1 
+  # E.g. strncpy(dest, src, n)
+  strncpy:  # Function name
+  - 1       # src is index 1 
+  - 2       # n is index 2
+  memcpy:   # void *memcpy(void *dest, const void *src, size_t n);
+  - 1       # src
+  - 2       # n
+  fprintf:  # int fprintf(FILE *stream, const char *format, ...);
+  - 1       # format
+  printf:   # int printf(const char *format, ...);
+  - 0       # format
+  sprintf:  # int sprintf(char *str, const char *format, ...);
+  - 1       # format
+  snprintf: # int snprintf(char *str, size_t size, const char *format, ...);
+  - 2       # format
+  - 1       # size (bounds-related; optional)
+  execl:    # int execl(const char *path, const char *arg, ...);
+  - 0     # path
+  execlp:   # int execlp(const char *file, const char *arg, ...);
+  - 0     # file
+  popen:    # FILE *popen(const char *command, const char *type);
+  - 0     # command
+  system:   # int system(const char *command);
+  - 0     # command
+# Defines sources, to be flagged **if a sink to source path contains the sources defined here.**
+# 他只是记录individual output，而不对提取CC造成影响
+source_functions:
+- fgets
+- getenv
+- fscanf
+- fread
+- fwscanf
+- sscanf
+- vfwscanf
+- vwscanf
+- wscanf
+- fgetws
+- recv
+- recvfrom
+- nvram_get
+- websGetVar
+
+
+source_global_symbols:
+  - uri
+
+flag_main_as_source: false
+
+# ------------------------- Tracing-related options ------------------------- #
+
+auto_define_undefined_functions: false
+supress_cannot_find_parent_function_warning: true
+trace_symbol_offset: false
+find_better_arg_max_iterations: 50
+max_funccall_output_trace_depth: 1000
+
+console_log_level: INFO
+file_log_level: DEBUG
+
+# happen in args-to-other-args tracing,TODO
+source_sink_parameter_signatures:
+  strcat: # char *strcat(char *dest, const char *src);
+    destination_parameter_indexes:
+    - 0
+    source_parameter_indexes:
+    - 1
+  strncpy: # char *strncpy(char *dest, const char *src, size_t n);
+    destination_parameter_indexes:
+    - 0
+    source_parameter_indexes:
+    - 1
+    - 2
+  strncat: # char *strncat(char *dest, const char *src, size_t n);
+    destination_parameter_indexes:
+    - 0
+    source_parameter_indexes:
+    - 1
+    - 2
+  memcpy: # void *memcpy(void *dest, const void *src, size_t n);
+    destination_parameter_indexes:
+    - 0
+    source_parameter_indexes:
+    - 1
+    - 2
+  memmove: # void *memmove(void *dest, const void *src, size_t n);
+    destination_parameter_indexes:
+    - 0
+    source_parameter_indexes:
+    - 1
+    - 2
+  strdup: # char *strdup(const char *s);
+    destination_parameter_indexes:
+    - ret
+    source_parameter_indexes:
+    - 0
+  sscanf: # int sscanf(const char *str, const char *format, ...);
+    destination_parameter_indexes:
+    - 2  # 下面这些输出参数是按常见上限硬编码，便于静态追踪
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    source_parameter_indexes: []
+  fscanf: # int fscanf(FILE *stream, const char *format, ...);
+    destination_parameter_indexes:
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    source_parameter_indexes: []
+  strtok: # char *strtok(char *str, const char *delim);
+    destination_parameter_indexes:
+    - ret
+    source_parameter_indexes:
+    - 0
+    - 1
+  strchr: # char *strchr(const char *s, int c);
+    destination_parameter_indexes:
+    - ret
+    source_parameter_indexes:
+    - 0
+  strstr: # char *strstr(const char *haystack, const char *needle);
+    destination_parameter_indexes:
+    - ret
+    source_parameter_indexes:
+    - 0
+    - 1
+  atoi: # int atoi(const char *nptr);
+    destination_parameter_indexes:
+    - ret
+    source_parameter_indexes:
+    - 0
+  atol: # long atol(const char *nptr);
+    destination_parameter_indexes:
+    - ret
+    source_parameter_indexes:
+    - 0
+  atoll: # long long atoll(const char *nptr);
+    destination_parameter_indexes:
+    - ret
+    source_parameter_indexes:
+    - 0
+  strtol: # long strtol(const char *nptr, char **endptr, int base);
+    destination_parameter_indexes:
+    - ret
+    - 1   # *endptr 内容来源于 nptr
+    source_parameter_indexes:
+    - 0
+    - 2
+  strtoul: # unsigned long strtoul(const char *nptr, char **endptr, int base);
+    destination_parameter_indexes:
+    - ret
+    - 1
+    source_parameter_indexes:
+    - 0
+    - 2
+  read: # ssize_t read(int fd, void *buf, size_t count);
+    destination_parameter_indexes:
+    - 1   # buf tainted by external source
+    - ret
+    source_parameter_indexes:
+    - 0
+    - 2
+  recv: # ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+    destination_parameter_indexes:
+    - 1
+    - ret
+    source_parameter_indexes: []
+  fgets:
+    destination_parameter_indexes:
+    - 1
+    - ret
+    source_parameter_indexes: []
+  getenv: # char *getenv(const char *name);
+    destination_parameter_indexes:
+    - ret
+    source_parameter_indexes: []
+  socket:
+    destination_parameter_indexes:
+    - ret      # 返回的 socket fd
+    source_parameter_indexes: []
+  htons:
+    destination_parameter_indexes:
+    - ret   # 返回的 network-order 值
+    source_parameter_indexes:
+    - 0     # hostshort 输入
+  connect:
+    destination_parameter_indexes:
+    - 0    # sockfd，被更新/绑定
+    source_parameter_indexes:
+    - 1    # addr，提供远端信息
+    - 2    # addrlen，可能影响使用范围
+
+
+OPENAI_API_KEY: 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
+
+AVAILABLE_MODELS:
+  - gpt-4o
+  - gpt-4o-mini
+  - gpt-5-mini-2025-08-07
+  - deepseek-r1
+  - gpt-5-2025-08-07
+  - gpt-4.1-2025-04-14
+  - anthropic/claude-sonnet-4.5
+MODEL: openai/gpt-5.1-codex
+API_BASE: https://openrouter.ai/api/v1/

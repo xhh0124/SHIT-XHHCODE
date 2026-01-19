@@ -1,0 +1,50 @@
+[
+    {
+        "type": "advisor",
+        "name": "add_comment",
+        "prompt": {
+            "role": "user",
+            "content": "Add code comments for the code snippet in the following C code for better semantic readability. No explanation.ATTENTION!Keep all function calls exactly with the same arguments number,You are NOT allowed to fix vulnerabilities..\n{code}"
+        }
+    },
+    {
+        "type": "advisor",
+        "name": "rename_vartmp",
+        "prompt": {
+            "role": "user",
+            "content": "Rename the variables for the code snippet in the following C code and rename the following C function for better semantic readability. Output the old name and its new name in a *single* JSON dictionary. Do not use any markdown formatting. For example, use {{\"old_(func)name\": \"new_(func)name\"}} to represent replace the variable name \"old_name\" with \"new_name\". No explanation. \\n {code}"
+        }
+    },
+    {
+        "type": "advisor",
+        "name": "rename_var",
+        "prompt": {
+            "role": "user",
+            "content": "Rename the variables for the code snippet in the following C code for better semantic readability. Output the old name and its new name in a *single* JSON dictionary. Do not use any markdown formatting. For example, use {{\"old_name\": \"new_name\"}} to represent replace the variable name \"old_name\" with \"new_name\". No explanation. \\n {code}"
+        }
+    },
+    {
+        "type": "advisor",
+        "name": "remove_unnecessary",
+        "prompt": {
+            "role": "user",
+            "content": "Simplify the following C function by removing redundant variables and unnecessary code for better semantic readability. No explanation. Don't change the variable types and function semantics.ATTENTION!Keep all function calls exactly with the same arguments number,You are NOT allowed to fix vulnerabilities..\n{code}"
+        }
+    },
+    {
+        "type": "referee",
+        "name": "need",
+        "prompt": {
+            "role": "user",
+            "content": "Do you think the following code needs structure simplification, comment appending, and variable renaming for better semantic readability? Answer three yes or no in order. No explanation.\n{code}"
+        }
+    },
+    {
+        "type": "last_check",
+        "name": "delete_unused_comment",
+        "prompt": {
+            "role": "user",
+            "content": "Optimize comments in the following C code.\\n\\nRules:\\n1. Delete trivial comments that only describe VERY obvious syntax or behavior(e.g. size_t len = strlen(array);).BUT keep comments about vulnerablity trace (in source,sink,taint propagation,exec branch,etc.e.g. len = recv(socketFD,pointer,Length, 0); // Receive data from the socket,may generate user-control data)\\n2. If a comment contains stale variable names or function names (before renaming vars), update the comment to use the new variable names.\\n3. Modify comments that help taint analysis, Highlight the features that may lead to vulnerabilities.\\n Output only the cleaned code. No explanation.\\n{code}"
+        }
+    }
+]

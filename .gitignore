@@ -1,0 +1,9 @@
+
+# 但明确忽略这些无关目录和文件
+**/.vscode/
+**/ghidra/
+**/ghidra-wsl-debug/
+**/lib
+**.zip
+**/GhOST Output
+**/sample
