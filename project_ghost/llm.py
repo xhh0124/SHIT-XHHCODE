@@ -71,10 +71,6 @@ E_TEMPLATE = (
     "Output format: Begin your answer with **'Yes'** or **'No'**, followed by a short explanation describing the key reason for your decision.DO NOT consider other CWE!\n"
     "{call_context}\n"
 )
-#"- If a value comes directly from stdin (e.g., via fscanf) and no branch predicate or sanitization constrains it before the callsite, then its value_range defaults to the full representable range of its type.\n"
-#"- Only mark value_range as \"OVERFLOW\" if the arithmetic result exceeds the type\'s representable range **within the feasible execution path that reaches this callsite**. Values blocked by branch predicates MUST NOT be considered; if overflow occurs only in pruned branches, do NOT mark \"OVERFLOW\".\n"
-#"- CHAR TYPE IS SIGNED!THEN,If a function argument contains an expression such as a+1, do not use the value range of 'a'; instead, compute the value range of the full expression.\n"
-    
 #     "When evaluating CWE190, overflow may occur in the arithmetic producing the argument, not inside the sink;"
 #    "if any argument has label \"OVERFLOWED\", you MUST treat it as a confirmed CWE190 vulnerability, regardless of the sink's internal behavior.\n"
 # ==== 工具函数 ====
@@ -677,12 +673,12 @@ def DetectVuln():
         results = {}
         for vid, flow in data.items():
             print(f"Analyzing {vid} in {subdir}...")  # vid是vuln0,vuln1...
-            #try:
-            print(model)
-            result, messages = analyze_flow(flow, client, model, api_base)
-            #except Exception as e:
-            #    result = f"Error caused may by time error"
-            #    messages = "BADBADBADBABDADBAD"
+            try:
+                print(model)
+                result, messages = analyze_flow(flow, client, model, api_base)
+            except Exception as e:
+                result = f"Error caused may by time error"
+                messages = "BADBADBADBABDADBAD"
             results[vid] = result
 
            #  print(f"--- {vid} Result ---\n{result}\n\n\n")
